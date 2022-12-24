@@ -1,14 +1,13 @@
 #include <memory.h>
-#include <arpa/inet.h>
 #include "md5.h"
 #include "tools/memory_tools.h"
 
 #pragma region private
 
-#define A 0x67452301
-#define B 0xefcdab89
-#define C 0x98badcfe
-#define D 0x10325476
+#define INITIAL_A 0x67452301
+#define INITIAL_B 0xefcdab89
+#define INITIAL_C 0x98badcfe
+#define INITIAL_D 0x10325476
 
 #define T01 0xd76aa478
 #define T02 0xe8c7b756
@@ -112,28 +111,28 @@ static uint8_t PADDING[64] =
 #define FF(a, b, c, d, x, s, t)                      \
 {                                                    \
     (a) += F((b), (c), (d)) + (x) + (uint32_t)(t);   \
-    (a) = ROTATE_LEFT((a), (s));                     \
+    (a) = ROTATE_LEFT_32((a), (s));                  \
     (a) += (b);                                      \
 }
 
 #define GG(a, b, c, d, x, s, t)                      \
 {                                                    \
     (a) += G((b), (c), (d)) + (x) + (uint32_t)(t);   \
-    (a) = ROTATE_LEFT((a), (s));                     \
+    (a) = ROTATE_LEFT_32((a), (s));                  \
     (a) += (b);                                      \
 }
 
 #define HH(a, b, c, d, x, s, t)                      \
 {                                                    \
     (a) += H((b), (c), (d)) + (x) + (uint32_t)(t);   \
-    (a) = ROTATE_LEFT((a), (s));                     \
+    (a) = ROTATE_LEFT_32((a), (s));                  \
     (a) += (b);                                      \
 }
 
 #define II(a, b, c, d, x, s, t)                      \
 {                                                    \
     (a) += I((b), (c), (d)) + (x) + (uint32_t)(t);   \
-    (a) = ROTATE_LEFT((a), (s));                     \
+    (a) = ROTATE_LEFT_32((a), (s));                  \
     (a) += (b);                                      \
 }
 
@@ -231,10 +230,10 @@ void md5_init(struct md5_context *context)
 {
 	context->size = 0;
 
-	context->state[0] = A;
-	context->state[1] = B;
-	context->state[2] = C;
-	context->state[3] = D;
+	context->state[0] = INITIAL_A;
+	context->state[1] = INITIAL_B;
+	context->state[2] = INITIAL_C;
+	context->state[3] = INITIAL_D;
 }
 
 void md5_update(struct md5_context *context, const void *input, size_t input_size)

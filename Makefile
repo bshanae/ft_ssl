@@ -6,7 +6,7 @@ LD=gcc
 LD_FLAGS=
 
 PROJECT_NAME=ft_ssl
-SRC_DIRS=main main/md5 main/tools
+SRC_DIRS=main main/tools main/md5 main/sha256
 INCLUDE_DIRS=main
 EXE_NAME=ft_ssl
 
