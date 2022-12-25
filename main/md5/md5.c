@@ -1,6 +1,7 @@
 #include <memory.h>
 #include "md5.h"
 #include "tools/memory_tools.h"
+#include "libft_standart.h"
 
 #pragma region private
 
@@ -144,7 +145,7 @@ void md5_transform(uint32_t state[4], const void *input)
 	uint32_t d = state[3];
 
 	uint32_t x[16];
-	memcpy(x, input, 64);
+	ft_memcpy(x, input, 64);
 
 	// round 1
 	FF(a, b, c, d, x[ 0], S11, T01)
@@ -246,7 +247,7 @@ void md5_update(struct md5_context *context, const void *input, size_t input_siz
 	if (input_size >= free_in_cache)
 	{
 		// fill cache and process its content
-		memcpy(context->cache + used_in_cache, input, free_in_cache);
+		ft_memcpy(context->cache + used_in_cache, input, free_in_cache);
 		md5_transform(context->state, context->cache);
 
 		// process input by 64 bytes block
@@ -255,13 +256,13 @@ void md5_update(struct md5_context *context, const void *input, size_t input_siz
 			md5_transform(context->state, &input[written]);
 
 		// copy leftover data into cache
-		memcpy(context->cache, input + written, input_size - written);
+		ft_memcpy(context->cache, input + written, input_size - written);
 	}
 	else
 	{
 		// write input to cache
 		// in next update call or in finalize call the cache will be processed
-		memcpy(context->cache + used_in_cache, input, input_size);
+		ft_memcpy(context->cache + used_in_cache, input, input_size);
 	}
 }
 
@@ -280,7 +281,7 @@ void md5_finalize(struct md5_context *context, unsigned char digest[16])
 	md5_update(context, &size_in_bits, 8);
 
 	uint32_t test[16];
-	memcpy(test, context->cache, 64);
+	ft_memcpy(test, context->cache, 64);
 
 	// move the result into digest
 	for (unsigned int i = 0; i < 4; i++)

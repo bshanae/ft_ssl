@@ -1,6 +1,7 @@
 #include <memory.h>
 #include "sha256.h"
 #include "tools/memory_tools.h"
+#include "libft_standart.h"
 
 #pragma region private
 
@@ -140,7 +141,7 @@ void sha256_finalize(struct sha256_context *context, uint8_t digest[32])
 		while (i < 64)
 			context->cache[i++] = 0x00;
 		sha256_transform(context, context->cache);
-		memset(context->cache, 0, 56);
+		ft_memset(context->cache, 0, 56);
 	}
 
 	// Append to the padding the total message's length in bits and transform.
