@@ -1,7 +1,7 @@
 # PROJECT CONFIG
 
 СС=gcc
-CC_FLAGS=-g
+CC_FLAGS=-g -Wall
 LD=gcc
 LD_FLAGS=
 
@@ -11,7 +11,7 @@ MAIN_SRC_DIRS=main main/md5 main/sha256
 MAIN_INCLUDE_DIRS=main
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/md5 main/sha256 test test/tools
+TEST_SRC_DIRS=main/md5 main/sha256 test test/tools test/md5_tests test/sha256_tests
 TEST_INCLUDE_DIRS=test main
 TEST_EXE_NAME=ft_ssl_tests
 
