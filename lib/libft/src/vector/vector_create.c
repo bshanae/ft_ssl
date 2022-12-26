@@ -6,17 +6,18 @@
 /*   By: bshanae <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/14 16:07:29 by bshanae           #+#    #+#             */
-/*   Updated: 2019/05/28 20:31:46 by bshanae          ###   ########.fr       */
+/*   Updated: 2022/12/26 11:20:48 by v.belchenko      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft_vector.h"
+#include <stdlib.h>
 
 t_vector					*vector_create(size_t element_size)
 {
 	t_vector				*vector;
 
-	vector = ft_malloc(NULL, sizeof(t_vector));
+	vector = malloc(sizeof(t_vector));
 	vector->storage = NULL;
 	vector->element_size = 0;
 	vector->capacity = 0;

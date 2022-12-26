@@ -11,11 +11,7 @@ SRC_DIRS= src/std_char \
 		  src/std_num \
 		  src/std_string \
 		  src/get_next_line \
-		  src/list \
-		  src/list2 \
-		  src/queue \
 		  src/vector \
-		  src/btree \
 		  src/ft_printf \
 		  src/ft_printf/ftp_buffer \
 		  src/ft_printf/ftp_control \

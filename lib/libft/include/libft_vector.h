@@ -6,7 +6,7 @@
 /*   By: bshanae <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/14 16:15:25 by bshanae           #+#    #+#             */
-/*   Updated: 2019/12/18 16:57:58 by bshanae          ###   ########.fr       */
+/*   Updated: 2022/12/26 11:20:02 by v.belchenko      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define LIBFT_VECTOR_H
 
 # include "libft_standart.h"
-# include "libft_error.h"
 
 # define VECTOR_ALLOC_INIT	10
 # define VECTOR_ALLOC_MULT	2
