@@ -17,7 +17,7 @@ void sha256_test(const unsigned test_id, const char *input)
 	sha256_string(input, actual_hash);
 	const char *actual_hash_str = hex_to_str(actual_hash, 64);
 
-	test_string("sha256", test_id, 64, actual_hash_str, reference_hash_str);
+	test_hash("sha256", test_id, input, 64, actual_hash_str, reference_hash_str);
 
 	free((void *)actual_hash_str);
 	free((void *)reference_hash_str);

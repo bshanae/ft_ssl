@@ -20,7 +20,7 @@ void md5_test(const unsigned test_id, const char *input)
 	md5_string(input, actual_hash);
 	const char *actual_hash_str = hex_to_str(actual_hash, 16);
 
-	test_string("md5", test_id, 16, actual_hash_str, reference_hash_str);
+	test_hash("md5", test_id, input, 16, actual_hash_str, reference_hash_str);
 
 	free((void *) reference_hash_str);
 	free((void *) actual_hash_str);

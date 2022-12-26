@@ -12,12 +12,12 @@ void print_ok(const char *test_group, const unsigned test_id)
 	printf(TERM_GRN "[%s@%i] OK\n" TERM_RESET, test_group, test_id);
 }
 
-void print_ko(const char *test_group, const unsigned test_id, const char *actual, const char *expected)
+void print_ko_hash(const char *test_group, const unsigned test_id, const char *message, const char *actual_hash, const char *expected_hash)
 {
 	printf(TERM_RED);
-	printf("[%s@%i] KO\n", test_group, test_id);
-	printf("[%s@%i] ACTUAL:   '%s'\n", test_group, test_id, actual);
-	printf("[%s@%i] EXPECTED: '%s'\n", test_group, test_id, expected);
+	printf("[%s@%i] MESSAGE:  '%s'\n", test_group, test_id, message);
+	printf("[%s@%i] ACTUAL:   '%s'\n", test_group, test_id, actual_hash);
+	printf("[%s@%i] EXPECTED: '%s'\n", test_group, test_id, expected_hash);
 	printf(TERM_RESET);
 }
 
@@ -38,7 +38,7 @@ const char *random_str(const unsigned max_length)
 	return result;
 }
 
-void test_string(const char *test_group, const unsigned test_id, const unsigned hash_length, const char *actual_hash, const char *expected_hash)
+void test_hash(const char *test_group, unsigned test_id, const char *message, unsigned hash_length, const char *actual_hash, const char *expected_hash)
 {
 	if (strncmp(actual_hash, expected_hash, hash_length) == 0)
 	{
@@ -46,7 +46,7 @@ void test_string(const char *test_group, const unsigned test_id, const unsigned 
 	}
 	else
 	{
-		print_ko(test_group, test_id, actual_hash, expected_hash);
+		print_ko_hash(test_group, test_id, message, actual_hash, expected_hash);
 		test_result = 1;
 	}
 }
