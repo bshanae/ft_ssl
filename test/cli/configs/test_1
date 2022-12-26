@@ -1,0 +1,6 @@
+#ARGS
+md5
+#STDIN
+42 is nice
+#STDOUT
+(stdin)= 35f1d6de0302e2086a4e472266efb3a9

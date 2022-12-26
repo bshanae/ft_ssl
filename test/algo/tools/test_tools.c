@@ -9,7 +9,7 @@
 
 void print_ok(const char *test_group, const unsigned test_id)
 {
-	printf(TERM_GRN "[%s@%i] OK\n" TERM_RESET, test_group, test_id);
+	printf(TERM_GREEN "[%s@%i] OK\n" TERM_RESET, test_group, test_id);
 }
 
 void print_ko_hash(const char *test_group, const unsigned test_id, const char *message, const char *actual_hash, const char *expected_hash)

@@ -11,9 +11,10 @@ MAIN_SRC_DIRS=main main/md5 main/sha256
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/md5 main/sha256 test test/tools test/md5_tests test/sha256_tests
-TEST_INCLUDE_DIRS=test main lib/libft/include
-TEST_EXE_NAME=ft_ssl_tests
+TEST_SRC_DIRS=main/md5 main/sha256 test/algo test/algo/tools test/algo/md5_tests test/algo/sha256_tests
+TEST_INCLUDE_DIRS=test/algo main lib/libft/include
+TEST_EXE_NAME=ft_ssl_algo_tests
+ADDITIONAL_TEST=python3 test/cli/ft_ssl_cli_tests.py
 
 LIBFT_PROJECT=lib/libft
 LIBFT_DIR=lib/libft/build
@@ -98,6 +99,10 @@ $(MAIN_EXE): libs $(MAIN_OBJ)
 $(foreach MAIN_SRC_DIR,$(MAIN_SRC_DIRS),$(eval $(call MAIN_OBJ_TEMPLATE,$(MAIN_SRC_DIR))))
 
 # TARGETS : TEST
+
+test: $(TEST_EXE)
+	@$(TEST_EXE)
+	@$(ADDITIONAL_TEST)
 
 $(TEST_EXE): libs $(TEST_OBJ)
 	$(call TEST_LOG,Linking executable)
