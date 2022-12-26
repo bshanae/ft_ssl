@@ -151,7 +151,7 @@ void sha256_update(struct sha256_context *context, const void *input, size_t inp
 	sha256_update__(context, input, input_size);
 }
 
-void sha256_finalize(struct sha256_context *context, uint8_t digest[32])
+void sha256_finalize(struct sha256_context *context, uint8_t hash[32])
 {
 	// save size
 
@@ -169,9 +169,9 @@ void sha256_finalize(struct sha256_context *context, uint8_t digest[32])
 	size_in_bits = SWAP_64(size_in_bits);
 	sha256_update(context, &size_in_bits, 8);
 
-	// write digest (in big endian)
+	// write hash (in big endian)
 
-	uint32_t *digest32 = (uint32_t *)digest;
+	uint32_t *hash32 = (uint32_t *)hash;
 	for (int i = 0; i < 8; i++)
-		digest32[i] = SWAP_32(context->state[i]);
+		hash32[i] = SWAP_32(context->state[i]);
 }

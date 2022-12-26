@@ -9,21 +9,21 @@
 
 void md5_test(const unsigned test_id, const char *input)
 {
-	uint8_t reference_digest[16];
+	uint8_t reference_hash[16];
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-	CC_MD5(input, strlen(input), reference_digest);
+	CC_MD5(input, strlen(input), reference_hash);
 #pragma GCC diagnostic pop
-	const char *reference_digest_str = hex_to_str(reference_digest, 16);
+	const char *reference_hash_str = hex_to_str(reference_hash, 16);
 
-	uint8_t actual_digest[16];
-	md5_string(input, actual_digest);
-	const char *actual_digest_str = hex_to_str(actual_digest, 16);
+	uint8_t actual_hash[16];
+	md5_string(input, actual_hash);
+	const char *actual_hash_str = hex_to_str(actual_hash, 16);
 
-	test_string("md5", test_id, 16, actual_digest_str, reference_digest_str);
+	test_string("md5", test_id, 16, actual_hash_str, reference_hash_str);
 
-	free((void *) reference_digest_str);
-	free((void *) actual_digest_str);
+	free((void *) reference_hash_str);
+	free((void *) actual_hash_str);
 }
 
 void md5_tests()

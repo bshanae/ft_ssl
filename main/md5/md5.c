@@ -265,7 +265,7 @@ void md5_update(struct md5_context *context, const void *input, size_t input_siz
 	}
 }
 
-void md5_finalize(struct md5_context *context, unsigned char digest[16])
+void md5_finalize(struct md5_context *context, unsigned char hash[16])
 {
 	// save size
 
@@ -282,13 +282,13 @@ void md5_finalize(struct md5_context *context, unsigned char digest[16])
 
 	md5_update(context, &size_in_bits, 8);
 
-	// move the result into digest
+	// move the result into hash
 
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		digest[(i * 4) + 0] = (uint8_t)((context->state[i] & 0x000000FF));
-		digest[(i * 4) + 1] = (uint8_t)((context->state[i] & 0x0000FF00) >> 8);
-		digest[(i * 4) + 2] = (uint8_t)((context->state[i] & 0x00FF0000) >> 16);
-		digest[(i * 4) + 3] = (uint8_t)((context->state[i] & 0xFF000000) >> 24);
+		hash[(i * 4) + 0] = (uint8_t)((context->state[i] & 0x000000FF));
+		hash[(i * 4) + 1] = (uint8_t)((context->state[i] & 0x0000FF00) >> 8);
+		hash[(i * 4) + 2] = (uint8_t)((context->state[i] & 0x00FF0000) >> 16);
+		hash[(i * 4) + 3] = (uint8_t)((context->state[i] & 0xFF000000) >> 24);
 	}
 }

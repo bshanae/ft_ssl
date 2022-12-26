@@ -38,15 +38,15 @@ const char *random_str(const unsigned max_length)
 	return result;
 }
 
-void test_string(const char *test_group, const unsigned test_id, const unsigned length, const char *actual, const char *expected)
+void test_string(const char *test_group, const unsigned test_id, const unsigned hash_length, const char *actual_hash, const char *expected_hash)
 {
-	if (strncmp(actual, expected, length) == 0)
+	if (strncmp(actual_hash, expected_hash, hash_length) == 0)
 	{
 		print_ok(test_group, test_id);
 	}
 	else
 	{
-		print_ko(test_group, test_id, actual, expected);
+		print_ko(test_group, test_id, actual_hash, expected_hash);
 		test_result = 1;
 	}
 }

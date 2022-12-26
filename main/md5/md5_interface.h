@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void md5_string(const char *string, uint8_t *digest);
+void md5_string(const char *string, uint8_t *hash);
 
 #endif

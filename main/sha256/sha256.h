@@ -14,6 +14,6 @@ struct sha256_context
 
 void sha256_init(struct sha256_context *context);
 void sha256_update(struct sha256_context *context, const void *input, size_t input_size);
-void sha256_finalize(struct sha256_context *context, uint8_t digest[32]);
+void sha256_finalize(struct sha256_context *context, uint8_t hash[32]);
 
 #endif
