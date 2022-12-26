@@ -1,4 +1,3 @@
-#include <memory.h>
 #include "sha256.h"
 #include "tools/memory_tools.h"
 #include "libft_standart.h"
@@ -33,6 +32,18 @@ static const uint32_t k[64] =
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
+static uint8_t padding[64] =
+{
+	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 void sha256_transform(struct sha256_context *context, const uint8_t *input_message)
 {
 	// copy message
@@ -40,7 +51,7 @@ void sha256_transform(struct sha256_context *context, const uint8_t *input_messa
 	uint32_t message[64];
 	for (unsigned i = 0; i < 16; i++)
 	{
-		uint32_t block = *(uint32_t *)(input_message + i * 4);
+		uint32_t block = *(uint32_t *) (input_message + i * 4);
 		message[i] = SWAP_32(block);
 	}
 
@@ -87,17 +98,34 @@ void sha256_transform(struct sha256_context *context, const uint8_t *input_messa
 
 void sha256_update__(struct sha256_context *context, const uint8_t *input, size_t input_size)
 {
-	for (unsigned i = 0; i < input_size; ++i)
-	{
-		context->cache[context->datalen] = input[i];
-		context->datalen++;
+	const size_t used_in_cache = context->size % 64;
+	const size_t free_in_cache = 64 - used_in_cache;
 
-		if (context->datalen == 64)
+	context->size += input_size;
+
+	if (input_size >= free_in_cache)
+	{
+		// fill cache and process its content
+		ft_memcpy(context->cache + used_in_cache, input, free_in_cache);
+		context->bitlen += 64 * 8;
+		sha256_transform(context, context->cache);
+
+		// process input by 64 bytes block
+		size_t written = free_in_cache;
+		for (; written + 63 < input_size; written += 64)
 		{
-			sha256_transform(context, context->cache);
-			context->bitlen += 512;
-			context->datalen = 0;
+			context->bitlen += 64 * 8;
+			sha256_transform(context, &input[written]);
 		}
+
+		// copy leftover data into cache
+		ft_memcpy(context->cache, input + written, input_size - written);
+	}
+	else
+	{
+		// write input to cache
+		// in next update call or in finalize call the cache will be processed
+		ft_memcpy(context->cache + used_in_cache, input, input_size);
 	}
 }
 
@@ -105,7 +133,7 @@ void sha256_update__(struct sha256_context *context, const uint8_t *input, size_
 
 void sha256_init(struct sha256_context *context)
 {
-	context->datalen = 0;
+	context->size = 0;
 	context->bitlen = 0;
 
 	context->state[0] = INITIAL_A;
@@ -125,48 +153,25 @@ void sha256_update(struct sha256_context *context, const void *input, size_t inp
 
 void sha256_finalize(struct sha256_context *context, uint8_t digest[32])
 {
-	unsigned i;
+	// save size
 
-	i = context->datalen;
+	uint64_t size_in_bits = context->size * 8;
 
-	// Pad whatever data is left in the buffer.
-	if (context->datalen < 56)
-	{
-		context->cache[i++] = 0x80;
-		while (i < 56)
-			context->cache[i++] = 0x00;
-	} else
-	{
-		context->cache[i++] = 0x80;
-		while (i < 64)
-			context->cache[i++] = 0x00;
-		sha256_transform(context, context->cache);
-		ft_memset(context->cache, 0, 56);
-	}
+	// write padding
 
-	// Append to the padding the total message's length in bits and transform.
-	context->bitlen += context->datalen * 8;
-	context->cache[63] = context->bitlen;
-	context->cache[62] = context->bitlen >> 8;
-	context->cache[61] = context->bitlen >> 16;
-	context->cache[60] = context->bitlen >> 24;
-	context->cache[59] = context->bitlen >> 32;
-	context->cache[58] = context->bitlen >> 40;
-	context->cache[57] = context->bitlen >> 48;
-	context->cache[56] = context->bitlen >> 56;
-	sha256_transform(context, context->cache);
+	const unsigned offset = context->size % 64;
+	const unsigned padding_length = offset < 56 ? 56 - offset : (56 + 64) - offset;
 
-	// Since this implementation uses little endian byte ordering and SHA uses big endian,
-	// reverse all the bytes when copying the final state to the output hash.
-	for (i = 0; i < 4; ++i)
-	{
-		digest[i] = (context->state[0] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 4] = (context->state[1] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 8] = (context->state[2] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 12] = (context->state[3] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 16] = (context->state[4] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 20] = (context->state[5] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 24] = (context->state[6] >> (24 - i * 8)) & 0x000000ff;
-		digest[i + 28] = (context->state[7] >> (24 - i * 8)) & 0x000000ff;
-	}
+	sha256_update(context, padding, padding_length);
+
+	// write size (in big endian)
+
+	size_in_bits = SWAP_64(size_in_bits);
+	sha256_update(context, &size_in_bits, 8);
+
+	// write digest (in big endian)
+
+	uint32_t *digest32 = (uint32_t *)digest;
+	for (int i = 0; i < 8; i++)
+		digest32[i] = SWAP_32(context->state[i]);
 }

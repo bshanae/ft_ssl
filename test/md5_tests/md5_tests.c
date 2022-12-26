@@ -36,10 +36,10 @@ void md5_tests()
 	md5_test(5, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	md5_test(6, "12345678901234567890123456789012345678901234567890123456789012345678901234567890");
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		const char *random_message = random_str(1024);
-		md5_test(100 + i, random_message);
+		md5_test(1000 + i, random_message);
 		free((void *)random_message);
 	}
 }

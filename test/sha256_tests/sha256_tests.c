@@ -31,10 +31,10 @@ void sha256_tests()
 	sha256_test(4, "hello world");
 	sha256_test(5, "qwertyuiopasdfghjklxcvbnm,cjhdsbcjhsbcjhbsdjchbsjhcbsjhbchsdbcjhsbdcjhbsdjhcbsjhdcbjshbdcjshbcdqwertyuiopasdfghjklxcvbnm,cj");
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		const char *random_message = random_str(1024);
-		sha256_test(100 + i, random_message);
+		sha256_test(1000 + i, random_message);
 		free((void *)random_message);
 	}
 }
