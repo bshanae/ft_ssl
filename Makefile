@@ -7,11 +7,11 @@ LD_FLAGS=
 
 PROJECT_NAME=ft_ssl
 
-MAIN_SRC_DIRS=main main/md5 main/sha256
+MAIN_SRC_DIRS=main/md5 main/sha256 main/tools main/cli main
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/md5 main/sha256 test/algo test/algo/tools test/algo/md5_tests test/algo/sha256_tests
+TEST_SRC_DIRS=main/md5 main/sha256 main/tools test/algo test/algo/tools test/algo/md5_tests test/algo/sha256_tests
 TEST_INCLUDE_DIRS=test/algo main lib/libft/include
 TEST_EXE_NAME=ft_ssl_algo_tests
 ADDITIONAL_TEST=python3 test/cli/ft_ssl_cli_tests.py

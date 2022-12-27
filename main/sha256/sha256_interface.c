@@ -2,7 +2,7 @@
 #include "sha256.h"
 #include <string.h>
 
-void sha256_string(const char *string, uint8_t *hash)
+void sha256_string(const char *string, uint8_t hash[32])
 {
 	struct sha256_context context;
 

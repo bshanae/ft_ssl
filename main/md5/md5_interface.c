@@ -2,7 +2,7 @@
 #include "md5.h"
 #include <string.h>
 
-void md5_string(const char *string, uint8_t *hash)
+void md5_string(const char *string, uint8_t hash[16])
 {
 	struct md5_context context;
 
