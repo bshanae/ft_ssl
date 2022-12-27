@@ -9,104 +9,99 @@
 
 #pragma region private
 
-#define SOURCE_STDIN 1
-#define SOURCE_STR 2
-#define SOURCE_FILE 3
-
-void execute_task_with_target(struct task *task, const char *target, unsigned source)
+struct output_options
 {
-	const int f_print = HAS_BIT(task->flags, TASK_FLAG_PRINT);
-	const int f_quiet = HAS_BIT(task->flags, TASK_FLAG_QUIET);
-	const int f_reverse = HAS_BIT(task->flags, TASK_FLAG_REVERSE) && source != SOURCE_STDIN;
+	char f_print;
+	char f_quiet;
+	char f_reverse;
+	char print_command;
+	char print_prefix;
+	char print_postfix;
+};
 
-	const int print_command = source != SOURCE_STDIN  && !f_reverse;
-	const int print_prefix = !f_reverse && (!f_quiet || f_print);
-	const int print_postfix = f_reverse && !f_quiet;
+void resolve_output_options(struct output_options *options, struct task *task, char allow_reverse, char allow_print_command)
+{
+	options->f_print = HAS_BIT(task->flags, TASK_FLAG_PRINT);
+	options->f_quiet = HAS_BIT(task->flags, TASK_FLAG_QUIET);
+	options->f_reverse = HAS_BIT(task->flags, TASK_FLAG_REVERSE) && allow_reverse;
+	options->print_command = allow_print_command && !options->f_quiet && !options->f_reverse;
+	options->print_prefix = !options->f_reverse && (options->f_print || !options->f_quiet);
+	options->print_postfix = options->f_reverse && !options->f_quiet;
+}
 
-	if (print_command)
-	{
-		char *command_name = ft_strdup(task->command->name);
-		for (int i = 0; i < ft_strlen(command_name); i++)
-			to_upper(command_name + i);
+void print_command(struct task *task)
+{
+	char *command_name = ft_strdup(task->command->name);
+	for (int i = 0; i < ft_strlen(command_name); i++)
+		to_upper(command_name + i);
 
-		ft_printf("%s ", command_name);
+	ft_printf("%s ", command_name);
 
-		free(command_name);
-	}
+	free(command_name);
+}
 
-	if (print_prefix)
-	{
-		switch (source)
-		{
-			case SOURCE_STDIN:
-				if (f_print)
-				{
-					if (!f_quiet)
-					{
-						char *trimmed_target = ft_strtrim(target);
-						ft_printf("(\"%s\")= ", trimmed_target);
-						free(trimmed_target);
-					}
-					else
-					{
-						ft_printf(target);
-					}
-				}
-				else
-					ft_printf("(stdin)= ");
-				break;
-
-			case SOURCE_STR:
-				ft_printf("(\"%s\") = ", target);
-				break;
-
-			case SOURCE_FILE:
-				ft_printf("(file) = ");
-				break;
-
-			default:
-				ft_printf("%fd_out" "Unknown source.\n", STDERR_FILENO);
-				break;
-		}
-	}
-
+void print_hash(struct task *task, const char *target)
+{
 	uint8_t hash[256];
 	task->command->function(target, hash);
 	print_hex(hash, task->command->hash_size);
-
-	if (print_postfix)
-	{
-		switch (source)
-		{
-			case SOURCE_STR:
-				ft_printf(" \"%s\"", target);
-				break;
-
-			case SOURCE_FILE:
-				ft_printf(" file");
-				break;
-
-			default:
-				ft_printf("%fd_out" "Unknown source.\n", STDERR_FILENO);
-				break;
-		}
-	}
-
-	ft_printf("\n");
 }
 
 void process_stdin(struct task *task)
 {
+	// resolve input
+
 	char *std_input = NULL;
 	read_from_descriptor(&std_input, STDIN_FILENO);
 
-	if (ft_strlen(std_input) > 0)
-		execute_task_with_target(task, std_input, SOURCE_STDIN);
+	if (ft_strlen(std_input) == 0)
+	{
+		free(std_input);
+		return;
+	}
+
+	// print
+
+	struct output_options opts;
+	resolve_output_options(&opts, task, 0, 0);
+
+	if (opts.print_command)
+		print_command(task);
+
+	if (opts.print_prefix)
+	{
+		if (opts.f_print)
+		{
+			if (!opts.f_quiet)
+			{
+				char *trimmed_target = ft_strtrim(std_input);
+				ft_printf("(\"%s\")= ", trimmed_target);
+				free(trimmed_target);
+			}
+			else
+			{
+				ft_printf(std_input);
+			}
+		}
+		else
+		{
+			ft_printf("(stdin)= ");
+		}
+	}
+
+	print_hash(task, std_input);
+
+	ft_printf("\n");
+
+	// cleanup
+
 	free(std_input);
 }
 
 void process_string(struct task *task, int *argi, char **argv)
 {
+	// resolve input
+
 	if (!HAS_BIT(task->flags, TASK_FLAG_STRING))
 		return;
 	if (argv[*argi] == NULL)
@@ -115,12 +110,32 @@ void process_string(struct task *task, int *argi, char **argv)
 		return;
 	}
 
-	execute_task_with_target(task, argv[*argi], SOURCE_STR);
+	char *string = argv[*argi];
 	(*argi)++;
+
+	// print
+
+	struct output_options opts;
+	resolve_output_options(&opts, task, 1, 1);
+
+	if (opts.print_command)
+		print_command(task);
+
+	if (opts.print_prefix)
+		ft_printf("(\"%s\") = ", string);
+
+	print_hash(task, string);
+
+	if (opts.print_postfix)
+		ft_printf(" \"%s\"", string);
+
+	ft_printf("\n");
 }
 
 void process_file(struct task *task, int *argi, char **argv)
 {
+	// resolve input
+
 	if (argv[*argi] == NULL)
 		return;
 
@@ -134,7 +149,26 @@ void process_file(struct task *task, int *argi, char **argv)
 		return;
 	}
 
-	execute_task_with_target(task, file, SOURCE_FILE);
+	// print
+
+	struct output_options opts;
+	resolve_output_options(&opts, task, 1, 1);
+
+	if (opts.print_command)
+		print_command(task);
+
+	if (opts.print_prefix)
+		ft_printf("(%s) = ", filename);
+
+	print_hash(task, file);
+
+	if (opts.print_postfix)
+		ft_printf(" %s", filename);
+
+	ft_printf("\n");
+
+	// cleanup
+
 	free(file);
 }
 
