@@ -21,11 +21,7 @@ class TermColor:
     RESET = '\u001b[0m'
 
 
-def extract_id_from_test_name(name: str) -> int:
-    return int(re.findall(r'test_(\d*)', name)[0])
-
-
-def parse_test(path: str) -> Optional[Test]:
+def parse_test(dir: str, file: str) -> Optional[Test]:
     class ReadMode(Enum):
         SETUP = 1
         ARGS = 2
@@ -34,7 +30,7 @@ def parse_test(path: str) -> Optional[Test]:
         ERROR = 5
 
     test = Test()
-    test.id = 'cli@' + str(extract_id_from_test_name(path))
+    test.id = 'cli@' + file
     test.args = ''
     test.stdin = ''
 
@@ -42,7 +38,7 @@ def parse_test(path: str) -> Optional[Test]:
     stdout_lines = []
 
     read_mode = 0
-    with open(path) as lines:
+    with open(os.path.join(dir, file)) as lines:
         for line in lines:
             line = line.rstrip()
             if line[0] == '#':
@@ -103,8 +99,8 @@ def run_test(test: Test):
 
 
 config_dir = 'test/cli/configs'
-for file in sorted(os.listdir(config_dir), key=extract_id_from_test_name):
+for file in sorted(os.listdir(config_dir)):
     filename = os.fsdecode(file)
 
-    test = parse_test(os.path.join(config_dir, filename))
+    test = parse_test(config_dir, filename)
     run_test(test)
