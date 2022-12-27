@@ -14,7 +14,6 @@ MAIN_EXE_NAME=ft_ssl
 TEST_SRC_DIRS=main/md5 main/sha256 main/tools test/algo test/algo/tools test/algo/md5_tests test/algo/sha256_tests
 TEST_INCLUDE_DIRS=test/algo main lib/libft/include
 TEST_EXE_NAME=ft_ssl_algo_tests
-ADDITIONAL_TEST=python3 test/cli/ft_ssl_cli_tests.py
 
 LIBFT_PROJECT=lib/libft
 LIBFT_DIR=lib/libft/build
@@ -100,10 +99,6 @@ $(foreach MAIN_SRC_DIR,$(MAIN_SRC_DIRS),$(eval $(call MAIN_OBJ_TEMPLATE,$(MAIN_S
 
 # TARGETS : TEST
 
-test: $(TEST_EXE)
-	@$(TEST_EXE)
-	@$(ADDITIONAL_TEST)
-
 $(TEST_EXE): libs $(TEST_OBJ)
 	$(call TEST_LOG,Linking executable)
 	$(SILENT) $(LD) $(TEST_LD_FLAGS) $(TEST_OBJ) -o $@
@@ -113,5 +108,5 @@ $(foreach TEST_SRC_DIR,$(TEST_SRC_DIRS),$(eval $(call TEST_OBJ_TEMPLATE,$(TEST_S
 # FINAL
 
 -include $(DEP)
-.PHONY: all clean test libs libclean debug
+.PHONY: all clean libs libclean debug
 VPATH=$(MAIN_SRC_DIRS) $(TEST_SRC_DIRS)

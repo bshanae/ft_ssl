@@ -16,8 +16,8 @@ class Test:
 
 
 class TermColor:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
+    RED = '\033[0;91m'
+    GREEN = '\033[0;92m'
     RESET = '\u001b[0m'
 
 
