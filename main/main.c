@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include "cli/task_resolution.h"
-#include "cli/task_execution.h"
+#include "cli/cli.h"
 
 int main(int argc, char **argv)
 {

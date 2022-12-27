@@ -1,29 +1,29 @@
-#include "task_resolution.h"
+#include "cli.h"
 
 #include "libft_standart.h"
 #include "libft_ft_printf.h"
 
 #pragma region private
 
-int resolve_command(unsigned *command, int *argi, char **argv)
+int resolve_command(struct command_descriptor **command, int *argi, char **argv)
 {
 	const char *command_str = argv[*argi];
+	(*argi)++;
 
-	if (ft_strcmp(command_str, "md5") == 0)
+	*command = NULL;
+	for (int i = 0; i < command_descriptors_count; i++)
 	{
-		*command = TASK_COMMAND_MD5;
+		struct command_descriptor *test_command = command_descriptors + i;
+		if (ft_strcmp(command_str, test_command->name) == 0)
+			*command = test_command;
 	}
-	else if (ft_strcmp(command_str, "sha256") == 0)
-	{
-		*command = TASK_COMMAND_SHA256;
-	}
-	else
+
+	if (*command == NULL)
 	{
 		ft_printf("%fd_out" "[ft_ssl] Unknown command: %s\n", STDERR_FILENO, command_str);
 		return 1;
 	}
 
-	(*argi)++;
 	return 0;
 }
 

@@ -1,4 +1,4 @@
-#include "task_execution.h"
+#include "cli.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,8 +6,6 @@
 #include "libft_ft_printf.h"
 #include "tools/io_tools.h"
 #include "tools/bitflags_tools.h"
-#include "md5/md5_interface.h"
-#include "sha256/sha256_interface.h"
 
 #pragma region private
 
@@ -21,26 +19,19 @@ void execute_task_with_target(struct task *task, const char *target, unsigned so
 	const int f_quiet = HAS_BIT(task->flags, TASK_FLAG_QUIET);
 	const int f_reverse = HAS_BIT(task->flags, TASK_FLAG_REVERSE) && source != SOURCE_STDIN;
 
-	const int print_command = source != SOURCE_STDIN && !f_reverse;
+	const int print_command = source != SOURCE_STDIN  && !f_reverse;
 	const int print_prefix = !f_reverse && (!f_quiet || f_print);
 	const int print_postfix = f_reverse && !f_quiet;
 
 	if (print_command)
 	{
-		switch (task->command)
-		{
-			case TASK_COMMAND_MD5:
-				ft_printf("MD5 ");
-				break;
+		char *command_name = ft_strdup(task->command->name);
+		for (int i = 0; i < ft_strlen(command_name); i++)
+			to_upper(command_name + i);
 
-			case TASK_COMMAND_SHA256:
-				ft_printf("SHA256 ");
-				break;
+		ft_printf("%s ", command_name);
 
-			default:
-				ft_printf("%fd_out" "Unknown command.\n", STDERR_FILENO);
-				break;
-		}
+		free(command_name);
 	}
 
 	if (print_prefix)
@@ -79,23 +70,9 @@ void execute_task_with_target(struct task *task, const char *target, unsigned so
 		}
 	}
 
-	uint8_t hash[32];
-	switch (task->command)
-	{
-		case TASK_COMMAND_MD5:
-			md5_string(target, hash);
-			print_hex(hash, 16);
-			break;
-
-		case TASK_COMMAND_SHA256:
-			sha256_string(target, hash);
-			print_hex(hash, 32);
-			break;
-
-		default:
-			ft_printf("%fd_out" "Unknown command.\n", STDERR_FILENO);
-			break;
-	}
+	uint8_t hash[256];
+	task->command->function(target, hash);
+	print_hex(hash, task->command->hash_size);
 
 	if (print_postfix)
 	{
