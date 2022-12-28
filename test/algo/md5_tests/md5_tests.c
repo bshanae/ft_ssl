@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <CommonCrypto/CommonDigest.h>
 #include <string.h>
-#include "md5/md5_interface.h"
+#include "algo/md5/md5_interface.h"
 #include "tools/io_tools.h"
 #include "tools/test_tools.h"
 

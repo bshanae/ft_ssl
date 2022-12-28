@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <CommonCrypto/CommonDigest.h>
 #include <string.h>
-#include "sha256/sha256_interface.h"
+#include "algo/sha256/sha256_interface.h"
 #include "tools/io_tools.h"
 #include "tools/test_tools.h"
 

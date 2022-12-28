@@ -1,7 +1,7 @@
 #include "commands.h"
 
-#include "md5/md5_interface.h"
-#include "sha256/sha256_interface.h"
+#include "algo/md5/md5_interface.h"
+#include "algo/sha256/sha256_interface.h"
 
 struct command_descriptor command_descriptors[] =
 {
