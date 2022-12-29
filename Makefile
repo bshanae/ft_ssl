@@ -1,17 +1,28 @@
 # PROJECT CONFIG
 
 СС=gcc
-CC_FLAGS=-g -Wall
+CC_FLAGS=-g
 LD=gcc
 LD_FLAGS=
 
 PROJECT_NAME=ft_ssl
 
-MAIN_SRC_DIRS=main/algo/md5 main/algo/sha256 main/tools main/cli main
+MAIN_SRC_DIRS=main/algo/md5 \
+			main/algo/sha256 \
+			main/algo/base64 \
+			main/tools \
+			main/cli main
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/algo/md5 main/algo/sha256 main/tools test/algo test/algo/tools test/algo/md5_tests test/algo/sha256_tests
+TEST_SRC_DIRS=main/algo/md5 \
+			  main/algo/sha256 \
+			  main/tools test/algo \
+			  test/algo/tools \
+			  test/algo/md5_tests \
+			  test/algo/sha256_tests \
+			  test/algo/base64_tests/reference \
+			  test/algo/base64_tests
 TEST_INCLUDE_DIRS=test/algo main lib/libft/include
 TEST_EXE_NAME=ft_ssl_algo_tests
 
@@ -56,14 +67,14 @@ define MAIN_OBJ_TEMPLATE
 $(BUILD_OBJ_DIR)/$(1)/%.o: $(1)/%.c
 	$$(call MAIN_LOG,Compiling C object $$<)
 	$$(SILENT) mkdir -p $$(dir $$@)
-	$$(SILENT) $$(CC) $$(MAIN_CC_FLAGS) -c $$< -o $$@ -MMD
+	$$(SILENT) $$(CC) $$(MAIN_CC_FLAGS) -c $$< -o $$@ -MMD -MP
 endef
 
 define TEST_OBJ_TEMPLATE
 $(BUILD_OBJ_DIR)/$(1)/%.o: $(1)/%.c
 	$$(call TEST_LOG,Compiling C object $$<)
 	$$(SILENT) mkdir -p $$(dir $$@)
-	$$(SILENT) $$(CC) $$(TEST_CC_FLAGS) -c $$< -o $$@ -MMD
+	$$(SILENT) $$(CC) $$(TEST_CC_FLAGS) -c $$< -o $$@ -MMD -MP
 endef
 
 # TARGETS : COMMON

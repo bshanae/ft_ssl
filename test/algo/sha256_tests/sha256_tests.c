@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <CommonCrypto/CommonDigest.h>
 #include <string.h>
+#include "defines.h"
 #include "algo/sha256/sha256_interface.h"
 #include "tools/io_tools.h"
 #include "tools/test_tools.h"
@@ -17,7 +18,7 @@ void sha256_test(const unsigned test_id, const char *input)
 	sha256_string(input, actual_hash);
 	const char *actual_hash_str = hex_to_str(actual_hash, 64);
 
-	test_hash("sha256", test_id, input, 64, actual_hash_str, reference_hash_str);
+	test_permutation("sha256", test_id, input, 64, actual_hash_str, reference_hash_str);
 
 	free((void *)actual_hash_str);
 	free((void *)reference_hash_str);
@@ -31,7 +32,7 @@ void sha256_tests()
 	sha256_test(4, "hello world");
 	sha256_test(5, "qwertyuiopasdfghjklxcvbnm,cjhdsbcjhsbcjhbsdjchbsjhcbsjhbchsdbcjhsbdcjhbsdjhcbsjhdcbjshbdcjshbcdqwertyuiopasdfghjklxcvbnm,cj");
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < RANDOM_TEST_SIZE; i++)
 	{
 		const char *random_message = random_str(1024);
 		sha256_test(1000 + i, random_message);

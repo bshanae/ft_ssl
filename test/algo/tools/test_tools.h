@@ -4,6 +4,22 @@
 extern int test_result;
 
 const char *random_str(unsigned max_length);
-void test_hash(const char *test_group, unsigned test_id, const char *message, unsigned hash_length, const char *actual_hash, const char *expected_hash);
+
+void test_string(
+	const char *test_group,
+	unsigned test_id,
+	unsigned length,
+	const char *actual,
+	const char *expected
+);
+
+void test_permutation(
+	const char *test_group,
+	unsigned test_id,
+	const char *input,
+	unsigned permutation_length,
+	const char *actual_permutation,
+	const char *expected_permutation
+);
 
 #endif
