@@ -7,22 +7,30 @@ LD_FLAGS=
 
 PROJECT_NAME=ft_ssl
 
-MAIN_SRC_DIRS=main/algo/md5 \
-			main/algo/sha256 \
-			main/algo/base64 \
-			main/tools \
-			main/cli main
+MAIN_SRC_DIRS=main/algo/common \
+			  main/algo/md5 \
+			  main/algo/sha256 \
+			  main/algo/base64 \
+			  main/algo/des \
+			  main/tools \
+			  main/cli \
+			  main
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/algo/md5 \
+TEST_SRC_DIRS=main/algo/common \
+			  main/algo/md5 \
 			  main/algo/sha256 \
-			  main/tools test/algo \
+			  main/algo/base64 \
+			  main/algo/des \
+			  main/tools \
 			  test/algo/tools \
 			  test/algo/md5_tests \
 			  test/algo/sha256_tests \
+			  test/algo/base64_tests \
 			  test/algo/base64_tests/reference \
-			  test/algo/base64_tests
+			  test/algo/des_tests \
+			  test/algo
 TEST_INCLUDE_DIRS=test/algo main lib/libft/include
 TEST_EXE_NAME=ft_ssl_algo_tests
 

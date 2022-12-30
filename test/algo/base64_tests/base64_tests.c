@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "defines.h"
-#include "algo/base64/base64.c"
+#include "algo/base64/base64.h"
 #include "tools/test_tools.h"
 #include "reference/base64_reference.h"
 
