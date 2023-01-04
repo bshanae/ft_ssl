@@ -3,8 +3,7 @@
 PURPLE='\033[0;96m'
 RESET='\033[0m'
 
-echo "${PURPLE}BUILDING TESTS /--------------------------------------------------------------//${RESET}"
-make
+make 1> /dev/null
 
 echo "${PURPLE}RUNNING ALGO TESTS /----------------------------------------------------------//${RESET}"
 ./build/ft_ssl_algo_tests
