@@ -1,6 +1,0 @@
-#SETUP
-echo "And above all," > file
-#ARGS
-md5 -r file
-#STDOUT
-53d53ea94217b259c11a5a2d104ec58a file

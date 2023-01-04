@@ -1,6 +1,0 @@
-#SETUP
-echo "https://www.42.fr/" > website
-#ARGS
-sha256 -q website
-#STDOUT
-1ceb55d2845d9dd98557b50488db12bbf51aaca5aa9c1199eb795607a2457daf

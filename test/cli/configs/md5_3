@@ -1,6 +1,0 @@
-#ARGS
-md5 -q -r
-#STDIN
-Pity the living.
-#STDOUT
-e20c3b973f63482a778f3fd1869b7f25

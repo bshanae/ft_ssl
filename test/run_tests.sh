@@ -10,4 +10,4 @@ echo "${PURPLE}RUNNING ALGO TESTS /---------------------------------------------
 ./build/ft_ssl_algo_tests
 
 echo "${PURPLE}RUNNING CLI TESTS /-----------------------------------------------------------//${RESET}"
-python3 test/cli/ft_ssl_cli_tests.py
+ruby test/cli/ft_ssl_cli_tests.rb

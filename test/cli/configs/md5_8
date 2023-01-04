@@ -1,8 +1,0 @@
-#SETUP
-echo "And above all," > file
-#ARGS
-md5 file
-#STDIN
-some of this will not make sense at first
-#STDOUT
-MD5 (file) = 53d53ea94217b259c11a5a2d104ec58a

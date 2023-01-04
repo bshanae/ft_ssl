@@ -1,6 +1,0 @@
-#ARGS
-md5 -p
-#STDIN
-42 is nice
-#STDOUT
-("42 is nice")= 35f1d6de0302e2086a4e472266efb3a9
