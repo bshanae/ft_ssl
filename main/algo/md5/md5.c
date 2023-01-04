@@ -2,8 +2,6 @@
 #include "tools/memory_tools.h"
 #include "libft_standart.h"
 
-#pragma region private
-
 #define INITIAL_A 0x67452301
 #define INITIAL_B 0xefcdab89
 #define INITIAL_C 0x98badcfe
@@ -136,7 +134,7 @@ static uint8_t padding[64] =
     (a) += (b);                                      \
 }
 
-void md5_transform(uint32_t state[4], const void *input)
+static void md5_transform(uint32_t state[4], const void *input)
 {
 	uint32_t a = state[0];
 	uint32_t b = state[1];
@@ -223,8 +221,6 @@ void md5_transform(uint32_t state[4], const void *input)
 	state[2] += c;
 	state[3] += d;
 }
-
-#pragma endregion
 
 void md5_init(struct md5_context *context)
 {

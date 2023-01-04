@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include "tools/memory_tools.h"
 
-#pragma region private
-
 static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static const int inverse_charset[] =
@@ -138,8 +136,6 @@ static const int inverse_charset[] =
 	0, // ~
 	0  // .
 };
-
-#pragma endregion
 
 size_t base64_encoded_size(size_t message_size)
 {

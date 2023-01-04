@@ -2,8 +2,6 @@
 
 #include "algo/common/fiestel.h"
 
-#pragma region private
-
 #define GET_BIT_32(x, i) (((x) >> (32u - (i))) & 0x1u)
 #define GET_BIT_56(x, i) (((x) >> (56u - (i))) & 0x1lu)
 #define GET_BIT_64(x, i) (((x) >> (64u - (i))) & 0x1lu)
@@ -143,7 +141,7 @@ static char p_table[] =
 	22, 11, 4, 25
 };
 
-void key_schedule(uint64_t key, uint64_t subkeys[16])
+static void key_schedule(uint64_t key, uint64_t subkeys[16])
 {
 	uint64_t key1 = 0;
 	for (unsigned i = 0; i < 56; i++)
@@ -168,7 +166,7 @@ void key_schedule(uint64_t key, uint64_t subkeys[16])
 	}
 }
 
-uint64_t ip(uint64_t block)
+static uint64_t ip(uint64_t block)
 {
 	uint64_t result = 0;
 	for (unsigned i = 0; i < 64; i++)
@@ -177,7 +175,7 @@ uint64_t ip(uint64_t block)
 	return result;
 }
 
-uint64_t ip_inverse(uint64_t block)
+static uint64_t ip_inverse(uint64_t block)
 {
 	uint64_t result = 0;
 	for (unsigned i = 0; i < 64; i++)
@@ -186,7 +184,7 @@ uint64_t ip_inverse(uint64_t block)
 	return result;
 }
 
-uint64_t e(uint32_t v)
+static uint64_t e(uint32_t v)
 {
 	uint64_t result = 0;
 	for (unsigned i = 0; i < 48; i++)
@@ -195,7 +193,7 @@ uint64_t e(uint32_t v)
 	return result;
 }
 
-uint32_t f(uint32_t v, uint64_t key)
+static uint32_t f(uint32_t v, uint64_t key)
 {
 	uint64_t v1 = e(v) ^ key;
 
@@ -217,8 +215,6 @@ uint32_t f(uint32_t v, uint64_t key)
 
 	return v3;
 }
-
-#pragma endregion
 
 uint64_t des_encrypt(uint64_t block, uint64_t key)
 {

@@ -5,14 +5,12 @@
 #include <stdlib.h>
 #include "io_tools.h"
 
-#pragma region private
-
-void print_ok(const char *test_group, const unsigned test_id)
+static void print_ok(const char *test_group, const unsigned test_id)
 {
 	printf(TERM_GREEN "[%s@%i] OK\n" TERM_RESET, test_group, test_id);
 }
 
-void print_ko_string(
+static void print_ko_string(
 	const char *test_group,
 	const unsigned test_id,
 	const char *actual,
@@ -25,7 +23,7 @@ void print_ko_string(
 	printf(TERM_RESET);
 }
 
-void print_ko_permutation(
+static void print_ko_permutation(
 	const char *test_group,
 	const unsigned test_id,
 	const char *message,
@@ -39,8 +37,6 @@ void print_ko_permutation(
 	printf("[%s@%i] EXPECTED: '%s'\n", test_group, test_id, expected_hash);
 	printf(TERM_RESET);
 }
-
-#pragma endregion
 
 int test_result = 0;
 

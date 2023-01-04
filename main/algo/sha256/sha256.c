@@ -2,8 +2,6 @@
 #include "tools/memory_tools.h"
 #include "libft_standart.h"
 
-#pragma region private
-
 #define INITIAL_A 0x6a09e667
 #define INITIAL_B 0xbb67ae85
 #define INITIAL_C 0x3c6ef372
@@ -128,8 +126,6 @@ void sha256_update__(struct sha256_context *context, const uint8_t *input, size_
 		ft_memcpy(context->cache + used_in_cache, input, input_size);
 	}
 }
-
-#pragma endregion
 
 void sha256_init(struct sha256_context *context)
 {

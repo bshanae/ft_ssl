@@ -5,9 +5,7 @@
 #include "libft_standart.h"
 #include "processing/processing.h"
 
-#pragma region private
-
-command_processor find_command_processor(char *command)
+static command_processor find_command_processor(char *command)
 {
 	if (ft_strcmp(command, "md5") == 0)
 		return process_md5_command;
@@ -20,8 +18,6 @@ command_processor find_command_processor(char *command)
 
 	return NULL;
 }
-
-#pragma endregion
 
 int process_arguments(int argc, char **argv)
 {

@@ -22,7 +22,7 @@ struct output_options
 	int print_postfix;
 };
 
-static int resolve_flags__(unsigned *flags, int *argi, char **argv)
+static int resolve_flags(unsigned *flags, int *argi, char **argv)
 {
 	*flags = 0u;
 
@@ -60,7 +60,7 @@ static int resolve_flags__(unsigned *flags, int *argi, char **argv)
 	return 0;
 }
 
-void resolve_output_options__(struct output_options *options, unsigned flags, char allow_reverse, int allow_print_command)
+void resolve_output_options(struct output_options *options, unsigned flags, char allow_reverse, int allow_print_command)
 {
 	options->f_print = HAS_BIT(flags, F_PRINT);
 	options->f_quiet = HAS_BIT(flags, F_QUIET);
@@ -70,7 +70,7 @@ void resolve_output_options__(struct output_options *options, unsigned flags, ch
 	options->print_postfix = options->f_reverse && !options->f_quiet;
 }
 
-void print_command__(const char *algo_name)
+void print_command(const char *algo_name)
 {
 	char *command_name = ft_strdup(algo_name);
 	for (int i = 0; i < ft_strlen(command_name); i++)
@@ -81,14 +81,14 @@ void print_command__(const char *algo_name)
 	free(command_name);
 }
 
-void print_hash__(hash_function function, int hash_size, const char *input)
+void print_hash(hash_function function, int hash_size, const char *input)
 {
 	uint8_t hash[256];
 	function(input, hash);
 	print_hex(hash, hash_size);
 }
 
-void process_stdin__(unsigned flags, hash_function function, int hash_size, const char *algo_name)
+void process_stdin(unsigned flags, hash_function function, int hash_size, const char *algo_name)
 {
 	// resolve input
 
@@ -104,10 +104,10 @@ void process_stdin__(unsigned flags, hash_function function, int hash_size, cons
 	// print
 
 	struct output_options opts;
-	resolve_output_options__(&opts, flags, 0, 0);
+	resolve_output_options(&opts, flags, 0, 0);
 
 	if (opts.print_command)
-		print_command__(algo_name);
+		print_command(algo_name);
 
 	if (opts.print_prefix)
 	{
@@ -130,7 +130,7 @@ void process_stdin__(unsigned flags, hash_function function, int hash_size, cons
 		}
 	}
 
-	print_hash__(function, hash_size, std_input);
+	print_hash(function, hash_size, std_input);
 
 	ft_printf("\n");
 
@@ -139,7 +139,7 @@ void process_stdin__(unsigned flags, hash_function function, int hash_size, cons
 	free(std_input);
 }
 
-void process_string__(unsigned flags, hash_function function, int hash_size, const char *algo_name, int *argi, char **argv)
+void process_string(unsigned flags, hash_function function, int hash_size, const char *algo_name, int *argi, char **argv)
 {
 	// resolve input
 
@@ -157,15 +157,15 @@ void process_string__(unsigned flags, hash_function function, int hash_size, con
 	// print
 
 	struct output_options opts;
-	resolve_output_options__(&opts, flags, 1, 1);
+	resolve_output_options(&opts, flags, 1, 1);
 
 	if (opts.print_command)
-		print_command__(algo_name);
+		print_command(algo_name);
 
 	if (opts.print_prefix)
 		ft_printf("(\"%s\") = ", string);
 
-	print_hash__(function, hash_size, string);
+	print_hash(function, hash_size, string);
 
 	if (opts.print_postfix)
 		ft_printf(" \"%s\"", string);
@@ -173,7 +173,7 @@ void process_string__(unsigned flags, hash_function function, int hash_size, con
 	ft_printf("\n");
 }
 
-void process_file__(unsigned flags, hash_function function, int hash_size, const char *algo_name, int *argi, char **argv)
+void process_file(unsigned flags, hash_function function, int hash_size, const char *algo_name, int *argi, char **argv)
 {
 	// resolve input
 
@@ -193,15 +193,15 @@ void process_file__(unsigned flags, hash_function function, int hash_size, const
 	// print
 
 	struct output_options opts;
-	resolve_output_options__(&opts, flags, 1, 1);
+	resolve_output_options(&opts, flags, 1, 1);
 
 	if (opts.print_command)
-		print_command__(algo_name);
+		print_command(algo_name);
 
 	if (opts.print_prefix)
 		ft_printf("(%s) = ", filename);
 
-	print_hash__(function, hash_size, file);
+	print_hash(function, hash_size, file);
 
 	if (opts.print_postfix)
 		ft_printf(" %s", filename);
@@ -218,14 +218,14 @@ int process_hash_command(char **argv, hash_function function, int hash_size, con
 	int argi = 2;
 
 	unsigned flags;
-	if (resolve_flags__(&flags, &argi, argv) != 0)
+	if (resolve_flags(&flags, &argi, argv) != 0)
 		return 1;
 
 	if (HAS_BIT(flags, F_PRINT) || (!HAS_BIT(flags, F_STRING) && argv[argi] == NULL))
-		process_stdin__(flags, function, hash_size, algo_name);
+		process_stdin(flags, function, hash_size, algo_name);
 
-	process_string__(flags, function, hash_size, algo_name, &argi, argv);
-	process_file__(flags, function, hash_size, algo_name, &argi, argv);
+	process_string(flags, function, hash_size, algo_name, &argi, argv);
+	process_file(flags, function, hash_size, algo_name, &argi, argv);
 
 	return 0;
 }
