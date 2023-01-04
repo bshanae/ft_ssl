@@ -13,8 +13,8 @@ static command_processor find_command_processor(char *command)
 		return process_sha256_command;
 //	if (ft_strcmp(command, "base64") == 0)
 //		return process_base64_command;
-//	if (ft_strcmp(command, "des") == 0)
-//		return process_des_command;
+	if (ft_strcmp(command, "des") == 0)
+		return process_des_command;
 
 	return NULL;
 }

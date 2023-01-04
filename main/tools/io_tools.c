@@ -70,3 +70,8 @@ void print_hex(uint8_t *data, unsigned size)
 	for (unsigned i = 0; i < size; ++i)
 		ft_printf("%02x", data[i]);
 }
+
+void print_error(const char *str)
+{
+	ft_printf("%fd_out" "%s\n", STDERR_FILENO, str);
+}

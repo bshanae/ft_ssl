@@ -26,12 +26,12 @@ static int resolve_flags(unsigned *flags, int *argi, char **argv)
 {
 	*flags = 0u;
 
-	for (int i = *argi; argv[*argi] != NULL; i++)
+	for (; argv[*argi] != NULL; (*argi)++)
 	{
-		if (argv[i][0] != '-')
+		if (argv[*argi][0] != '-')
 			break;
 
-		switch (argv[i][1])
+		switch (argv[*argi][1])
 		{
 			case 'p':
 				*flags |= F_PRINT;
@@ -50,11 +50,9 @@ static int resolve_flags(unsigned *flags, int *argi, char **argv)
 				break;
 
 			default:
-				ft_printf("%fd_out" "Unknown flag: %s\n", STDERR_FILENO, argv[i]);
+				print_error("Unknown flag.");
 				return 1;
 		}
-
-		(*argi)++;
 	}
 
 	return 0;
@@ -147,7 +145,7 @@ void process_string(unsigned flags, hash_function function, int hash_size, const
 		return;
 	if (argv[*argi] == NULL)
 	{
-		ft_printf("%fd_out" "Expected a string input.\n", STDERR_FILENO);
+		print_error("Expected a string input.");
 		return;
 	}
 
@@ -186,7 +184,7 @@ void process_file(unsigned flags, hash_function function, int hash_size, const c
 	char *file = NULL;
 	if (read_from_file(&file, filename) != 0)
 	{
-		ft_printf("%fd_out" "Can't read file '%s'\n", STDERR_FILENO, filename);
+		print_error("Can't read file.");
 		return;
 	}
 
