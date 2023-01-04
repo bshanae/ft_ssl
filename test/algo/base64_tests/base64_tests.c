@@ -10,7 +10,7 @@
 void base64_encoding_test(const unsigned test_id, const char *input)
 {
 	size_t reference_size;
-	char *reference = ref_base64_encode(input, strlen(input), &reference_size);
+	char *reference = ref_base64_encode((const unsigned char *)input, strlen(input), &reference_size);
 
 	const size_t result_size = base64_encoded_size(strlen(input));
 	char *result = malloc(result_size);

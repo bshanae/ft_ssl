@@ -14,6 +14,7 @@ MAIN_SRC_DIRS=main/algo/common \
 			  main/algo/des \
 			  main/tools \
 			  main/cli \
+			  main/cli/processing \
 			  main
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
