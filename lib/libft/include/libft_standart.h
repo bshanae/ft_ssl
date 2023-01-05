@@ -68,6 +68,7 @@ int					is_float(const char *c);
 
 int					ft_atoi(const char *str);
 int					ft_atoi_base(const char *str, int base);
+long				ft_atol_base(const char *str, int base);
 double				ft_atof(const char *str, int *length);
 char				*ft_itoa(int n);
 size_t				ft_strlen(const char *str);
