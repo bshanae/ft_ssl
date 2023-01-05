@@ -7,7 +7,8 @@ LD_FLAGS=
 
 PROJECT_NAME=ft_ssl
 
-MAIN_SRC_DIRS=main/algo/common \
+MAIN_SRC_DIRS=main/algo/tools/fiestel \
+			  main/algo/tools/salt \
 			  main/algo/md5 \
 			  main/algo/sha256 \
 			  main/algo/base64 \
@@ -19,7 +20,8 @@ MAIN_SRC_DIRS=main/algo/common \
 MAIN_INCLUDE_DIRS=main lib/libft/include
 MAIN_EXE_NAME=ft_ssl
 
-TEST_SRC_DIRS=main/algo/common \
+TEST_SRC_DIRS=main/algo/tools/fiestel \
+              main/algo/tools/salt \
 			  main/algo/md5 \
 			  main/algo/sha256 \
 			  main/algo/base64 \
