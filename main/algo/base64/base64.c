@@ -139,12 +139,17 @@ static const int inverse_charset[] =
 
 size_t base64_encoded_size(size_t message_size)
 {
-	return message_size * 4 / 3 + 1;
+	const size_t base_size = message_size * 4 / 3;
+	const size_t newline_count = base_size / 64;
+
+	return base_size + newline_count;
 }
 
 size_t base64_decoded_size(size_t encoded_size)
 {
-	return encoded_size * 3 / 4 + 1;
+	const size_t newline_count = encoded_size / 64;
+
+	return encoded_size * 3 / 4 - newline_count;
 }
 
 void base64_encode(char *out, const char *in, size_t size)
@@ -162,6 +167,9 @@ void base64_encode(char *out, const char *in, size_t size)
 		out[j++] = charset[(chars >> 20) & 0x3f];
 		out[j++] = charset[(chars >> 14) & 0x3f];
 		out[j++] = charset[(chars >> 8) & 0x3f];
+
+		if (j % 64 == 0)
+			out[j++] = '\n';
 	}
 
 	switch (size % 3)

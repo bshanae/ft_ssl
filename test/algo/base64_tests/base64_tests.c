@@ -12,7 +12,7 @@ void base64_encoding_test(const unsigned test_id, const char *input)
 	size_t reference_size;
 	char *reference = ref_base64_encode((const unsigned char *)input, strlen(input), &reference_size);
 
-	const size_t result_size = base64_encoded_size(strlen(input));
+	const size_t result_size = base64_encoded_size(strlen(input)) + 1;
 	char *result = malloc(result_size);
 	bzero(result, result_size);
 	base64_encode(result, input, strlen(input));
@@ -32,7 +32,7 @@ void base64_encoding_test(const unsigned test_id, const char *input)
 
 void base64_round_test(const unsigned test_id, const char *input)
 {
-	const size_t encoded_size = base64_encoded_size(strlen(input));
+	const size_t encoded_size = base64_encoded_size(strlen(input)) + 1;
 	char *encoded = malloc(encoded_size);
 	bzero(encoded, encoded_size);
 	base64_encode(encoded, input, strlen(input));
