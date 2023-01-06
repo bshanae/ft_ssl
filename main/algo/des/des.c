@@ -1,8 +1,6 @@
 #include "des.h"
 
-#include "libft_standart.h"
-#include "algo/md5/md5_interface.h"
-#include "algo/tools/fiestel/fiestel.h"
+#include "algo/tools/fiestel.h"
 
 #define GET_BIT_32(x, i) (((x) >> (32u - (i))) & 0x1u)
 #define GET_BIT_56(x, i) (((x) >> (56u - (i))) & 0x1lu)
@@ -216,25 +214,12 @@ static uint32_t f(uint32_t v, uint64_t key)
 	return v3;
 }
 
-void des_generate_key(const char *password, uint64_t salt, uint8_t hash[16])
-{
-	const int password_length = (int)ft_strlen(password);
-	const int password_with_salt_length = password_length + 8;
-
-	char *password_with_salt = malloc(password_with_salt_length + 1);
-	ft_strcpy(password_with_salt, password);
-	ft_memcpy(password_with_salt + password_length, &salt, 8);
-	password_with_salt[password_with_salt_length] = '\0';
-
-	md5_memory(password_with_salt, 12, hash);
-
-	free(password_with_salt);
-}
-
 uint64_t des_encrypt(uint64_t block, uint64_t key)
 {
 	block = ip(block);
 
+	// This code should be moved away from here, because we need to do this only once.
+	// However, because this project is educational, I'll leave it here.
 	uint64_t subkeys[16];
 	key_schedule(key, subkeys);
 

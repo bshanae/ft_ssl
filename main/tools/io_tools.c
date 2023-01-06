@@ -53,9 +53,9 @@ int read_from_descriptor(char **data, int fd)
 	return 0;
 }
 
-int read_from_file(char **data, const char *path)
+int read_from_file(const char *path, char **data)
 {
-	int fd = open(path, S_IREAD);
+	int fd = open(path, O_RDONLY);
 	if (fd == -1)
 		return 1;
 
@@ -65,10 +65,23 @@ int read_from_file(char **data, const char *path)
 	return result;
 }
 
-void print_hex(uint8_t *data, unsigned size)
+int write_to_file(const char *path, const char *data, const size_t size)
 {
+	int fd = open(path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd == -1)
+		return 1;
+
+	write(fd, data, size);
+	close(fd);
+
+	return 0;
+}
+
+void print_hex(const void *data, unsigned size)
+{
+	const uint8_t *data8 = (const uint8_t *)data;
 	for (unsigned i = 0; i < size; ++i)
-		ft_printf("%02x", data[i]);
+		ft_printf("%02x", data8[i]);
 }
 
 void print_error(const char *str)

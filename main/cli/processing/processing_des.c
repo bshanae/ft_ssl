@@ -1,12 +1,11 @@
 #include "processing.h"
 
-#include <string.h>
 #include "libft_standart.h"
-#include "libft_ft_printf.h"
 #include "tools/io_tools.h"
 #include "tools/memory_tools.h"
-#include "algo/tools/salt/salt.h"
-#include "algo/des/des.h"
+#include "algo/tools/salt.h"
+#include "algo/base64/base64.h"
+#include "algo/des/des_interface.h"
 
 #define M_ENCRYPT 0
 #define M_DECRYPT 1
@@ -136,9 +135,9 @@ int resolve_options(struct options *options, int *argi, char **argv)
 	return 0;
 }
 
-static int resolve_key_and_iv(struct options *options)
+static int resolve_key_and_iv(struct options *options, const int need_iv)
 {
-	if (options->has_key && options->has_iv)
+	if (options->has_key && (options->has_iv || !need_iv))
 		return 0;
 
 	if (options->password == NULL)
@@ -177,20 +176,126 @@ static int resolve_key_and_iv(struct options *options)
 	return 0;
 }
 
-int process_des_command(char **argv)
+static int resolve_plaintext(const struct options *options, char **plaintext)
+{
+	if (options->input_file != NULL)
+	{
+		*plaintext = NULL;
+		if (read_from_file(options->input_file, plaintext) != 0)
+		{
+			print_error("Failed to read from file!");
+			free(*plaintext);
+			return 1;
+		}
+
+		return 0;
+	}
+	else
+	{
+		char *std_input = NULL;
+		read_from_descriptor(&std_input, STDIN_FILENO);
+
+		if (ft_strlen(std_input) == 0)
+		{
+			free(std_input);
+			return 1;
+		}
+
+		*plaintext = std_input;
+		return 0;
+	}
+}
+
+void encode_ciphertext_with_base64(const char *ciphertext, const size_t ciphertext_size, char **ciphertext_b64, size_t *ciphertext_b64_size)
+{
+	*ciphertext_b64_size = base64_encoded_size(ciphertext_size);
+	*ciphertext_b64 = malloc(*ciphertext_b64_size + 1);
+
+	base64_encode(*ciphertext_b64, ciphertext, ciphertext_size, 1);
+	(*ciphertext_b64)[*ciphertext_b64_size] = 0;
+}
+
+static void write_ciphertext(const struct options *options, const char *ciphertext, const size_t ciphertext_size)
+{
+	if (options->output_file != NULL)
+	{
+		if (write_to_file(options->output_file, ciphertext, ciphertext_size) != 0)
+			print_error("Failed to write to file!");
+	}
+	else
+	{
+		write(STDOUT_FILENO, ciphertext, ciphertext_size);
+		write(STDOUT_FILENO, "\n", 1);
+	}
+}
+
+typedef void (* des_function)(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key);
+typedef void (* des_function_with_iv)(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key, const uint64_t *iv);
+
+static int process_des_command(char **argv, void *des, const int use_iv)
 {
 	int argi = 2;
+
+	// resolve options
 
 	struct options options;
 	if (resolve_options(&options, &argi, argv) != 0)
 		return 1;
 
-	if (resolve_key_and_iv(&options) != 0)
+	// resolve key and iv
+
+	if (resolve_key_and_iv(&options, use_iv) != 0)
 		return 1;
 
-	ft_printf("key=%lx\n", options.key);
+	// resolve plaintext
 
-//	des_encrypt()
+	char *plaintext;
+	if (resolve_plaintext(&options, &plaintext) != 0)
+		return 1;
+
+	// compute plaintext and ciphertext sizes
+
+	const size_t plaintext_size = ft_strlen(plaintext);
+	const size_t ciphertext_size = des_encrypted_size(plaintext_size);
+
+	// generate ciphertext
+
+	char *ciphertext = malloc(ciphertext_size + 1);
+	ciphertext[ciphertext_size] = 0;
+	if (use_iv)
+		((des_function_with_iv)des)(plaintext, ciphertext, ft_strlen(plaintext), &options.key, &options.iv);
+	else
+		((des_function)des)(plaintext, ciphertext, ft_strlen(plaintext), &options.key);
+
+	// encode ciphertext with base64
+
+	char *ciphertext_b64 = NULL;
+	size_t ciphertext_b64_size = 0;
+	if (options.encode_with_base64)
+		encode_ciphertext_with_base64(ciphertext, ciphertext_size, &ciphertext_b64, &ciphertext_b64_size);
+
+	// output ciphertext
+
+	if (ciphertext_b64 != NULL)
+		write_ciphertext(&options, ciphertext_b64, ciphertext_b64_size);
+	else
+		write_ciphertext(&options, ciphertext, ciphertext_size);
+
+	// exit
+
+	free(plaintext);
+	free(ciphertext);
+	free(ciphertext_b64);
 
 	return 0;
+}
+
+int process_des_ecb_command(char **argv)
+{
+	return process_des_command(argv, des_ecb, 0);
+}
+
+int process_des_cbc_command(char **argv)
+{
+	return process_des_command(argv, des_ecb, 1);
 }

@@ -48,10 +48,7 @@ void sha256_transform(struct sha256_context *context, const uint8_t *input_messa
 
 	uint32_t message[64];
 	for (unsigned i = 0; i < 16; i++)
-	{
-		uint32_t block = *(uint32_t *) (input_message + i * 4);
-		message[i] = SWAP_32(block);
-	}
+		message[i] = to_bigendian_32(*(uint32_t *) (input_message + i * 4));
 
 	// expand message
 
@@ -162,12 +159,12 @@ void sha256_finalize(struct sha256_context *context, uint8_t hash[32])
 
 	// write size (in big endian)
 
-	size_in_bits = SWAP_64(size_in_bits);
+	size_in_bits = to_bigendian_64(size_in_bits);
 	sha256_update(context, &size_in_bits, 8);
 
 	// write hash (in big endian)
 
 	uint32_t *hash32 = (uint32_t *)hash;
 	for (int i = 0; i < 8; i++)
-		hash32[i] = SWAP_32(context->state[i]);
+		hash32[i] = to_bigendian_32(context->state[i]);
 }

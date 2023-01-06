@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "tools/memory_tools.h"
+#include "tools/math_tools.h"
 
 static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -139,7 +140,7 @@ static const int inverse_charset[] =
 
 size_t base64_encoded_size(size_t message_size)
 {
-	const size_t base_size = message_size * 4 / 3;
+	const size_t base_size = ROUND_UP(message_size * 4 / 3, 4);
 	const size_t newline_count = base_size / 64;
 
 	return base_size + newline_count;
@@ -152,23 +153,19 @@ size_t base64_decoded_size(size_t encoded_size)
 	return encoded_size * 3 / 4 - newline_count;
 }
 
-void base64_encode(char *out, const char *in, size_t size)
+void base64_encode(char *out, const char *in, size_t size, int put_newline)
 {
-	const int little_endian = is_little_endian();
-
 	int j = 0;
 	for (int i = 0; i < size; i += 3)
 	{
-		uint32_t chars = *(uint32_t *)(in + i);
-		if (little_endian)
-			chars = SWAP_32(chars);
+		uint32_t chars = to_bigendian_32(*(uint32_t *)(in + i));
 
 		out[j++] = charset[chars >> 26];
 		out[j++] = charset[(chars >> 20) & 0x3f];
 		out[j++] = charset[(chars >> 14) & 0x3f];
 		out[j++] = charset[(chars >> 8) & 0x3f];
 
-		if (j % 64 == 0)
+		if (put_newline && j % 64 == 0)
 			out[j++] = '\n';
 	}
 
@@ -184,8 +181,6 @@ void base64_encode(char *out, const char *in, size_t size)
 
 void base64_decode(char *out, const char *in, size_t size)
 {
-	const int little_endian = is_little_endian();
-
 	for (int i = 0, j = 0; i < size; i += 4)
 	{
 		const unsigned padding_count = (in[i + 2] == '=') + (in[i + 3] == '=');
@@ -196,8 +191,7 @@ void base64_decode(char *out, const char *in, size_t size)
 		chars |= inverse_charset[in[i + 2]] << 14;
 		chars |= inverse_charset[in[i + 3]] << 8;
 
-		if (little_endian)
-			chars = SWAP_32(chars);
+		chars = to_bigendian_32(chars);
 
 		char *chars_ptr = (char *)&chars;
 		out[j++] = chars_ptr[0];

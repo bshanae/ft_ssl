@@ -4,6 +4,8 @@ class TestConfig
 	attr_reader :stdin
 	attr_reader :args
 	attr_reader :expected_stdout
+	attr_reader :expected_file_name
+	attr_reader :expected_file_content
 
 	def initialize(id)
 		@id = id
@@ -27,6 +29,12 @@ class TestConfig
 
 	def expect_stdout(stdout)
 		@expected_stdout = stdout
+		self
+	end
+
+	def expect_file(name, content)
+		@expected_file_name = name
+		@expected_file_content = content
 		self
 	end
 end

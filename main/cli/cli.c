@@ -14,7 +14,11 @@ static command_processor find_command_processor(char *command)
 //	if (ft_strcmp(command, "base64") == 0)
 //		return process_base64_command;
 	if (ft_strcmp(command, "des") == 0)
-		return process_des_command;
+		return process_des_cbc_command;
+	if (ft_strcmp(command, "des-ecb") == 0)
+		return process_des_ecb_command;
+	if (ft_strcmp(command, "des-cbc") == 0)
+			return process_des_cbc_command;
 
 	return NULL;
 }

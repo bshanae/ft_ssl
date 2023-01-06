@@ -18,10 +18,27 @@ class TestRunner
 			stdout, _ = Open3.capture2(cmd)
 			stdout = stdout[0..-2]
 
-			if test.expected_stdout == stdout
+			if not test.expected_stdout.nil?
+				success = test.expected_stdout == stdout
+				result = stdout
+			elsif not test.expected_file_name.nil?
+				begin
+					file_content = IO.read(test.expected_file_name)
+				rescue
+					file_content = '(error)'
+				end
+				success = test.expected_file_content == file_content
+				result = file_content
+			else
+				puts_red('Test does not declare any expectations!')
+				success = true
+				result = '(error)'
+			end
+
+			if success
 				print_ok(test)
 			else
-				print_ko(test, cmd, stdout)
+				print_ko(test, cmd, result)
 			end
 		end
 
@@ -40,14 +57,25 @@ class TestRunner
 		puts_green("[cli@#{test.id}] OK")
 	end
 
-	private def print_ko(test, cmd, stdout)
+	private def print_ko(test, cmd, result)
 		puts_red("[cli@#{test.id}] KO")
-		puts_red("## COMMAND ##")
+		puts_red("// ================================================================================================================== //")
+		puts_red("-- COMMAND ---------------------------------------------------------------------------------------------------------- //")
 		puts_red(cmd)
-		puts_red("## ACTUAL OUTPUT ##")
-		puts_red(stdout)
-		puts_red("## EXPECTED OUTPUT ##")
-		puts_red(test.expected_stdout)
+		if test.expected_file_name.nil?
+			puts_red("-- ACTUAL OUTPUT ---------------------------------------------------------------------------------------------------- //")
+		else
+			puts_red("-- ACTUAL FILE CONTENT ---------------------------------------------------------------------------------------------- //")
+		end
+		puts_red(result)
+		if test.expected_file_name.nil?
+			puts_red("-- EXPECTED OUTPUT -------------------------------------------------------------------------------------------------- //")
+			puts_red(test.expected_stdout)
+		else
+			puts_red("-- EXPECTED FILE CONTENT -------------------------------------------------------------------------------------------- //")
+			puts_red(test.expected_file_content)
+		end
+		puts_red("// ================================================================================================================== //")
 	end
 
 	private def puts_green(str)

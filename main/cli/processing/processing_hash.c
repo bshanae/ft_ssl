@@ -182,7 +182,7 @@ void process_file(unsigned flags, hash_function function, int hash_size, const c
 	(*argi)++;
 
 	char *file = NULL;
-	if (read_from_file(&file, filename) != 0)
+	if (read_from_file(filename, &file) != 0)
 	{
 		print_error("Can't read file.");
 		return;
