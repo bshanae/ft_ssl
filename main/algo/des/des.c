@@ -11,8 +11,6 @@
 #define SET_BIT_48(x, i, b) (x) |= ((b) << (47lu - (i)));
 #define SET_BIT_64(x, i, b) (x) |= ((b) << (63lu - (i)));
 
-#define ROTATE_LEFT_28(x, n) (((x) << (n)) | ((x) >> (28 - (n))))
-
 static char key_permutation_table[] =
 {
 	57, 49, 41, 33, 25, 17, 9,
@@ -156,8 +154,8 @@ static void key_schedule(uint64_t key, uint64_t subkeys[16])
 	{
 		for (unsigned j = 0; j < key_rotate_table[i]; j++)
 		{
-			c = ROTATE_LEFT_28(c, 1);
-			d = ROTATE_LEFT_28(d, 1);
+			c = 0x0fffffff & (c << 1) | 0x00000001 & (c >> 27);
+			d = 0x0fffffff & (d << 1) | 0x00000001 & (d >> 27);
 		}
 
 		const uint64_t cd = ((uint64_t)c << 28) | (uint64_t)d;
