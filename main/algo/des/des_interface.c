@@ -2,6 +2,7 @@
 
 #include "libft_standart.h"
 #include "tools/memory_tools.h"
+#include "tools/io_tools.h"
 #include "algo/tools/padding.h"
 #include "algo/md5/md5_interface.h"
 #include "des.h"
@@ -29,30 +30,56 @@ void des_generate_key(const char *password, uint64_t salt, uint8_t hash[16])
 	free(password_with_salt);
 }
 
-void des_ecb(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key)
+void des_encrypt_ecb(const void *plaintext, const size_t plaintext_size, void *ciphertext, const uint64_t *key)
 {
 	unsigned i = 0;
-	for (; i + DES_BLOCK_SIZE <= size; i += DES_BLOCK_SIZE)
+	for (; i + DES_BLOCK_SIZE <= plaintext_size; i += DES_BLOCK_SIZE)
 	{
 		const uint64_t block = to_bigendian_64(*(uint64_t *)(plaintext + i));
 		*(uint64_t *)(ciphertext + i) = to_bigendian_64(des_encrypt(block, *key));
 	}
 
 	uint8_t padding_block8[DES_BLOCK_SIZE];
-	ft_memcpy(padding_block8, plaintext + i, size - i);
-	pad_block(padding_block8, size - i, DES_BLOCK_SIZE);
+	ft_memcpy(padding_block8, plaintext + i, plaintext_size - i);
+	pad_block(padding_block8, plaintext_size - i, DES_BLOCK_SIZE);
 
 	const uint64_t padding_block64 = to_bigendian_64(*(uint64_t *)padding_block8);
 
 	*(uint64_t *)(ciphertext + i) = to_bigendian_64(des_encrypt(padding_block64, *key));
 }
 
-void des_cbc(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key, const uint64_t *iv)
+int des_decrypt_ecb(void *plaintext, size_t *plaintext_size, const void *ciphertext, size_t ciphertext_size, const uint64_t *key)
+{
+	if (ciphertext_size % DES_BLOCK_SIZE != 0)
+	{
+		print_error("Invalid ciphertext size.");
+		return 1;
+	}
+
+	unsigned i = 0;
+	for (; i < ciphertext_size; i += DES_BLOCK_SIZE)
+	{
+		const uint64_t block = to_bigendian_64(*(uint64_t *)(ciphertext + i));
+		*(uint64_t *)(plaintext + i) = to_bigendian_64(des_decrypt(block, *key));
+	}
+
+	const uint8_t padding_size = *(uint8_t *)(plaintext + i - 1);
+	if (padding_size >= i - 1)
+	{
+		print_error("Internal error.");
+		return 1;
+	}
+	*plaintext_size = i - 1 - padding_size;
+
+	return 0;
+}
+
+void des_encrypt_cbc(const void *plaintext, size_t plaintext_size, void *ciphertext, const uint64_t *key, const uint64_t *iv)
 {
 	uint64_t previous_block = *iv;
 
 	unsigned i = 0;
-	for (; i + DES_BLOCK_SIZE <= size; i += DES_BLOCK_SIZE)
+	for (; i + DES_BLOCK_SIZE <= plaintext_size; i += DES_BLOCK_SIZE)
 	{
 		const uint64_t block = to_bigendian_64(*(uint64_t *)(plaintext + i));
 		const uint64_t encrypted_block = to_bigendian_64(des_encrypt(block ^ previous_block, *key));
@@ -62,8 +89,8 @@ void des_cbc(const void *plaintext, void *ciphertext, size_t size, const uint64_
 	}
 
 	uint8_t padding_block8[DES_BLOCK_SIZE];
-	ft_memcpy(padding_block8, plaintext + i, size - i);
-	pad_block(padding_block8, size - i, DES_BLOCK_SIZE);
+	ft_memcpy(padding_block8, plaintext + i, plaintext_size - i);
+	pad_block(padding_block8, plaintext_size - i, DES_BLOCK_SIZE);
 
 	const uint64_t padding_block64 = to_bigendian_64(*(uint64_t *) padding_block8);
 

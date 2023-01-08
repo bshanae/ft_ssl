@@ -2,6 +2,7 @@
 
 #include "libft_standart.h"
 #include "tools/io_tools.h"
+#include "tools/math_tools.h"
 #include "tools/memory_tools.h"
 #include "algo/tools/salt.h"
 #include "algo/base64/base64.h"
@@ -12,7 +13,7 @@
 
 struct options
 {
-	int encode_with_base64;
+	int apply_base64;
 	int mode;
 	char *input_file;
 	char *output_file;
@@ -24,6 +25,10 @@ struct options
 	int has_iv;
 	uint64_t iv;
 };
+
+typedef void (* des_encrypt_functor)(const void *plaintext, size_t plaintext_size, void *ciphertext, const uint64_t *key, const uint64_t *iv);
+
+typedef int (* des_decrypt_functor)(void *plaintext, size_t *plaintext_size, const void *ciphertext, size_t ciphertext_size, const uint64_t *key, const uint64_t *iv);
 
 uint64_t parse_h64(const char *str)
 {
@@ -51,7 +56,7 @@ int resolve_options(struct options *options, int *argi, char **argv)
 		switch (argv[*argi][1])
 		{
 			case 'a':
-				options->encode_with_base64 = 1;
+				options->apply_base64 = 1;
 				break;
 
 			case 'd':
@@ -176,15 +181,15 @@ static int resolve_key_and_iv(struct options *options, const int need_iv)
 	return 0;
 }
 
-static int resolve_plaintext(const struct options *options, char **plaintext)
+static int resolve_input(const struct options *options, char **input)
 {
 	if (options->input_file != NULL)
 	{
-		*plaintext = NULL;
-		if (read_from_file(options->input_file, plaintext) != 0)
+		*input = NULL;
+		if (read_from_file(options->input_file, input) != 0)
 		{
 			print_error("Failed to read from file!");
-			free(*plaintext);
+			free(*input);
 			return 1;
 		}
 
@@ -201,38 +206,26 @@ static int resolve_plaintext(const struct options *options, char **plaintext)
 			return 1;
 		}
 
-		*plaintext = std_input;
+		*input = std_input;
 		return 0;
 	}
 }
 
-void encode_ciphertext_with_base64(const char *ciphertext, const size_t ciphertext_size, char **ciphertext_b64, size_t *ciphertext_b64_size)
-{
-	*ciphertext_b64_size = base64_encoded_size(ciphertext_size);
-	*ciphertext_b64 = malloc(*ciphertext_b64_size + 1);
-
-	base64_encode(*ciphertext_b64, ciphertext, ciphertext_size, 1);
-	(*ciphertext_b64)[*ciphertext_b64_size] = 0;
-}
-
-static void write_ciphertext(const struct options *options, const char *ciphertext, const size_t ciphertext_size)
+static void write_output(const struct options *options, const char *output, const size_t output_size)
 {
 	if (options->output_file != NULL)
 	{
-		if (write_to_file(options->output_file, ciphertext, ciphertext_size) != 0)
+		if (write_to_file(options->output_file, output, output_size) != 0)
 			print_error("Failed to write to file!");
 	}
 	else
 	{
-		write(STDOUT_FILENO, ciphertext, ciphertext_size);
+		write(STDOUT_FILENO, output, output_size);
 		write(STDOUT_FILENO, "\n", 1);
 	}
 }
 
-typedef void (* des_function)(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key);
-typedef void (* des_function_with_iv)(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key, const uint64_t *iv);
-
-static int process_des_command(char **argv, void *des, const int use_iv)
+static int process_des_command(char **argv, des_encrypt_functor encryptor, des_decrypt_functor decryptor, const int use_iv)
 {
 	int argi = 2;
 
@@ -247,55 +240,91 @@ static int process_des_command(char **argv, void *des, const int use_iv)
 	if (resolve_key_and_iv(&options, use_iv) != 0)
 		return 1;
 
-	// resolve plaintext
+	// resolve input
 
-	char *plaintext;
-	if (resolve_plaintext(&options, &plaintext) != 0)
+	char *input;
+	if (resolve_input(&options, &input) != 0)
 		return 1;
 
-	// compute plaintext and ciphertext sizes
+	size_t input_size = ft_strlen(input);
 
-	const size_t plaintext_size = ft_strlen(plaintext);
-	const size_t ciphertext_size = des_encrypted_size(plaintext_size);
+	// decode with base64
 
-	// generate ciphertext
+	if (options.mode == M_DECRYPT && options.apply_base64)
+	{
+		const size_t temp_size = base64_decoded_size(input_size);
+		char *temp = malloc(temp_size + 1);
+		temp[temp_size] = '\0';
 
-	char *ciphertext = malloc(ciphertext_size + 1);
-	ciphertext[ciphertext_size] = 0;
-	if (use_iv)
-		((des_function_with_iv)des)(plaintext, ciphertext, ft_strlen(plaintext), &options.key, &options.iv);
+		base64_decode(temp, input, input_size);
+
+		free(input);
+		input = temp;
+		input_size = temp_size;
+	}
+
+	// encode/decode
+
+	size_t output_size = (options.mode == M_ENCRYPT ? des_encrypted_size(input_size) : input_size);
+	char *output = malloc(output_size + 1);
+
+	if (options.mode == M_ENCRYPT)
+		encryptor(input, input_size, output, &options.key, &options.iv);
 	else
-		((des_function)des)(plaintext, ciphertext, ft_strlen(plaintext), &options.key);
+	{
+		if (decryptor(output, &output_size, input, ROUND_DOWN(input_size, DES_BLOCK_SIZE), &options.key, &options.iv) != 0)
+		{
+			free(input);
+			free(output);
+			return 1;
+		}
+	}
 
-	// encode ciphertext with base64
+	output[output_size] = '\0';
 
-	char *ciphertext_b64 = NULL;
-	size_t ciphertext_b64_size = 0;
-	if (options.encode_with_base64)
-		encode_ciphertext_with_base64(ciphertext, ciphertext_size, &ciphertext_b64, &ciphertext_b64_size);
+	// encode with base64
 
-	// output ciphertext
+	if (options.mode == M_ENCRYPT && options.apply_base64)
+	{
+		const size_t temp_size = base64_encoded_size(output_size);
+		char *temp = malloc(temp_size + 1);
+		temp[temp_size] = '\0';
 
-	if (ciphertext_b64 != NULL)
-		write_ciphertext(&options, ciphertext_b64, ciphertext_b64_size);
-	else
-		write_ciphertext(&options, ciphertext, ciphertext_size);
+		base64_encode(temp, output, output_size, 1);
+
+		free(output);
+		output = temp;
+		output_size = temp_size;
+	}
+
+	// write output
+
+	write_output(&options, output, output_size);
 
 	// exit
 
-	free(plaintext);
-	free(ciphertext);
-	free(ciphertext_b64);
+	free(input);
+	free(output);
 
 	return 0;
 }
 
+void des_encrypt_ecb_wrapper(const void *plaintext, size_t plaintext_size, void *ciphertext, const uint64_t *key, const uint64_t *_)
+{
+	des_encrypt_ecb(plaintext, plaintext_size, ciphertext, key);
+}
+
+int des_decrypt_ecb_wrapper(void *plaintext, size_t *plaintext_size, const void *ciphertext, size_t ciphertext_size, const uint64_t *key, const uint64_t *_)
+{
+	return des_decrypt_ecb(plaintext, plaintext_size, ciphertext, ciphertext_size, key);
+}
+
 int process_des_ecb_command(char **argv)
 {
-	return process_des_command(argv, des_ecb, 0);
+	return process_des_command(argv, des_encrypt_ecb_wrapper, des_decrypt_ecb_wrapper, 0);
 }
 
 int process_des_cbc_command(char **argv)
 {
-	return process_des_command(argv, des_cbc, 1);
+	return process_des_command(argv, des_encrypt_cbc, NULL, 1);
 }

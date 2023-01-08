@@ -181,8 +181,14 @@ void base64_encode(char *out, const char *in, size_t size, int put_newline)
 
 void base64_decode(char *out, const char *in, size_t size)
 {
-	for (int i = 0, j = 0; i < size; i += 4)
+	for (int i = 0, j = 0; i < size;)
 	{
+		if (in[i] == '\n')
+		{
+			i++;
+			continue;
+		}
+
 		const unsigned padding_count = (in[i + 2] == '=') + (in[i + 3] == '=');
 
 		uint32_t chars;
@@ -199,5 +205,7 @@ void base64_decode(char *out, const char *in, size_t size)
 			out[j++] = chars_ptr[1];
 		if (padding_count < 1)
 			out[j++] = chars_ptr[2];
+
+		i += 4;
 	}
 }

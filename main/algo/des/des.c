@@ -229,3 +229,17 @@ uint64_t des_encrypt(uint64_t block, uint64_t key)
 
 	return block;
 }
+
+uint64_t des_decrypt(uint64_t block, uint64_t key)
+{
+	block = ip(block);
+
+	uint64_t subkeys[16];
+	key_schedule(key, subkeys);
+
+	block = fiestel_decrypt(block, subkeys, f, 16);
+
+	block = ip_inverse(block);
+
+	return block;
+}
