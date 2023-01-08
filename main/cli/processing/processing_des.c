@@ -297,5 +297,5 @@ int process_des_ecb_command(char **argv)
 
 int process_des_cbc_command(char **argv)
 {
-	return process_des_command(argv, des_ecb, 1);
+	return process_des_command(argv, des_cbc, 1);
 }

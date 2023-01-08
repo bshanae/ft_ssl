@@ -66,4 +66,37 @@ class DesTestSuite
 				  .pass_args('des-ecb -k 123 -a -o out.txt')
 				  .expect_file('out.txt', 'LwQAsdaAVYKeMxRQ89l8TA==')
 	end
+
+	def test_cbc_basic_1
+		TestConfig.new('des@100')
+				  .pass_stdin('aaaaaaa')
+				  .pass_args('des-cbc -k 1 -v 1 -a')
+				  .expect_stdout('XpYZc1ckPE+2U7Gan+424g==')
+	end
+
+	def test_cbc_basic_2
+		TestConfig.new('des@101')
+				  .pass_stdin('foo bar')
+				  .pass_args('des-cbc -k 123 -v 123 -a')
+				  .expect_stdout('nI282mp+aQEhb41vHJeKHw==')
+	end
+
+	def test_cbc_basic_3
+		expected_stdout = <<~EOS.chomp
+			4RrD7kayc24oYjZlKWufTSzhTV25O5xXViGFi61pi4KEafPDTqO7kICj42meRWqK
+			O8SRV9a/jYKIYjy/kFx4Xg==
+		EOS
+
+		TestConfig.new('des@102')
+				  .pass_stdin('Lorem ipsum dolor sit amet, consectetur adipiscing elit')
+				  .pass_args('des-cbc -k 123 -v 123 -a')
+				  .expect_stdout(expected_stdout)
+	end
+
+	def test_cbc_reference
+		TestConfig.new('des@103')
+				  .pass_stdin('one deep secret')
+				  .pass_args('des-cbc -a -k 6162636461626364 -v 0011223344556677')
+				  .expect_stdout('zqYWONX68rWNxl7msIdGC67Uh2HfVEBo')
+	end
 end

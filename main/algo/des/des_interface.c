@@ -46,3 +46,26 @@ void des_ecb(const void *plaintext, void *ciphertext, size_t size, const uint64_
 
 	*(uint64_t *)(ciphertext + i) = to_bigendian_64(des_encrypt(padding_block64, *key));
 }
+
+void des_cbc(const void *plaintext, void *ciphertext, size_t size, const uint64_t *key, const uint64_t *iv)
+{
+	uint64_t previous_block = *iv;
+
+	unsigned i = 0;
+	for (; i + DES_BLOCK_SIZE <= size; i += DES_BLOCK_SIZE)
+	{
+		const uint64_t block = to_bigendian_64(*(uint64_t *)(plaintext + i));
+		const uint64_t encrypted_block = to_bigendian_64(des_encrypt(block ^ previous_block, *key));
+
+		*(uint64_t *)(ciphertext + i) = encrypted_block;
+		previous_block = to_bigendian_64(encrypted_block);
+	}
+
+	uint8_t padding_block8[DES_BLOCK_SIZE];
+	ft_memcpy(padding_block8, plaintext + i, size - i);
+	pad_block(padding_block8, size - i, DES_BLOCK_SIZE);
+
+	const uint64_t padding_block64 = to_bigendian_64(*(uint64_t *) padding_block8);
+
+	*(uint64_t *)(ciphertext + i) = to_bigendian_64(des_encrypt(padding_block64 ^ previous_block, *key));
+}
