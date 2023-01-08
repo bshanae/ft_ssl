@@ -134,4 +134,39 @@ class DesTestSuite
 				  .pass_args('des-ecb -k 123 -a -d -i in.txt')
 				  .expect_stdout(plaintext)
 	end
+
+	def test_dec_cbc_1
+		TestConfig.new('des@1101')
+				  .pass_stdin('iiqJOx6VTrU=')
+				  .pass_args('des-cbc -k 123 -v 123 -a -d')
+				  .expect_stdout('a')
+	end
+
+	def test_dec_cbc_2
+		TestConfig.new('des@1102')
+				  .pass_stdin('XpYZc1ckPE+2U7Gan+424g==')
+				  .pass_args('des-cbc -k 1 -v 1 -a -d')
+				  .expect_stdout('aaaaaaa')
+	end
+
+	def test_dec_cbc_3
+		plaintext = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+
+		ciphertext = <<~EOS.chomp
+			4RrD7kayc24oYjZlKWufTSzhTV25O5xXViGFi61pi4KEafPDTqO7kICj42meRWqK
+			O8SRV9a/jYKIYjy/kFx4Xg==
+		EOS
+
+		TestConfig.new('des@1103')
+				  .pass_stdin(ciphertext)
+				  .pass_args('des-cbc -k 123 -v 123 -a -d')
+				  .expect_stdout(plaintext)
+	end
+
+	def test_dec_cbc_reference
+		TestConfig.new('des@1104')
+				  .pass_stdin('zqYWONX68rWNxl7msIdGC67Uh2HfVEBo')
+				  .pass_args('des-cbc -a -k 6162636461626364 -v 0011223344556677 -d')
+				  .expect_stdout('one deep secret')
+	end
 end

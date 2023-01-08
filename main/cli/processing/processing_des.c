@@ -326,5 +326,5 @@ int process_des_ecb_command(char **argv)
 
 int process_des_cbc_command(char **argv)
 {
-	return process_des_command(argv, des_encrypt_cbc, NULL, 1);
+	return process_des_command(argv, des_encrypt_cbc, des_decrypt_cbc, 1);
 }

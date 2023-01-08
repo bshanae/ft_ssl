@@ -14,5 +14,6 @@ void des_encrypt_ecb(const void *plaintext, size_t plaintext_size, void *ciphert
 int des_decrypt_ecb(void *plaintext, size_t *plaintext_size, const void *ciphertext, size_t ciphertext_size, const uint64_t *key);
 
 void des_encrypt_cbc(const void *plaintext, size_t plaintext_size, void *ciphertext, const uint64_t *key, const uint64_t *iv);
+int des_decrypt_cbc(void *plaintext, size_t *plaintext_size, const void *ciphertext, size_t ciphertext_size, const uint64_t *key, const uint64_t *iv);
 
 #endif
