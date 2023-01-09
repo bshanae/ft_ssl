@@ -283,11 +283,11 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 
 	if (options.mode == M_DECRYPT && options.apply_base64)
 	{
-		const size_t temp_size = base64_decoded_size(input_size);
+		size_t temp_size = base64_max_decoded_size(input_size);
 		char *temp = malloc(temp_size + 1);
-		temp[temp_size] = '\0';
 
-		base64_decode(temp, input, input_size);
+		base64_decode(input, input_size, temp, &temp_size);
+		temp[temp_size] = '\0';
 
 		free(input);
 		input = temp;
@@ -321,7 +321,7 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 		char *temp = malloc(temp_size + 1);
 		temp[temp_size] = '\0';
 
-		base64_encode(temp, output, output_size, 1);
+		base64_encode(output, output_size, temp, 1);
 
 		free(output);
 		output = temp;

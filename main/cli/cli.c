@@ -11,8 +11,8 @@ static command_processor find_command_processor(char *command)
 		return process_md5_command;
 	if (ft_strcmp(command, "sha256") == 0)
 		return process_sha256_command;
-//	if (ft_strcmp(command, "base64") == 0)
-//		return process_base64_command;
+	if (ft_strcmp(command, "base64") == 0)
+		return process_base64_command;
 	if (ft_strcmp(command, "des") == 0)
 		return process_des_cbc_command;
 	if (ft_strcmp(command, "des-ecb") == 0)

@@ -2,6 +2,7 @@ require_relative 'core/test_collector'
 require_relative 'core/test_runner'
 require_relative 'tests/md5_test_suite'
 require_relative 'tests/sha256_test_suite'
+require_relative 'tests/base64_test_suite'
 require_relative 'tests/des_test_suite'
 
 test_collector = TestCollector.new

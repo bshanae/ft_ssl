@@ -4,9 +4,9 @@
 #include <stddef.h>
 
 size_t base64_encoded_size(size_t message_size);
-size_t base64_decoded_size(size_t encoded_size);
+size_t base64_max_decoded_size(size_t encoded_size);
 
-void base64_encode(char *out, const char *in, size_t size, int put_newline);
-void base64_decode(char *out, const char *in, size_t size);
+void base64_encode(const char *plain, size_t plain_size, char *encoded, int put_newline);
+void base64_decode(const char *encoded, size_t encoded_size, char *decoded, size_t *decoded_size);
 
 #endif

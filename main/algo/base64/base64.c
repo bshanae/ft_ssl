@@ -146,66 +146,74 @@ size_t base64_encoded_size(size_t message_size)
 	return base_size + newline_count;
 }
 
-size_t base64_decoded_size(size_t encoded_size)
+size_t base64_max_decoded_size(size_t encoded_size)
 {
 	const size_t newline_count = encoded_size / 64;
 
 	return encoded_size * 3 / 4 - newline_count;
 }
 
-void base64_encode(char *out, const char *in, size_t size, int put_newline)
+void base64_encode(const char *plain, size_t plain_size, char *encoded, int put_newline)
 {
 	int j = 0;
-	for (int i = 0; i < size; i += 3)
+	int nl = 0;
+	for (int i = 0; i < plain_size; i += 3)
 	{
-		uint32_t chars = to_bigendian_32(*(uint32_t *)(in + i));
+		uint32_t chars = to_bigendian_32(*(uint32_t *)(plain + i));
 
-		out[j++] = charset[chars >> 26];
-		out[j++] = charset[(chars >> 20) & 0x3f];
-		out[j++] = charset[(chars >> 14) & 0x3f];
-		out[j++] = charset[(chars >> 8) & 0x3f];
+		encoded[j++] = charset[chars >> 26];
+		encoded[j++] = charset[(chars >> 20) & 0x3f];
+		encoded[j++] = charset[(chars >> 14) & 0x3f];
+		encoded[j++] = charset[(chars >> 8) & 0x3f];
 
-		if (put_newline && j % 64 == 0)
-			out[j++] = '\n';
+		if (put_newline && (j - nl) % 64 == 0)
+		{
+			encoded[j++] = '\n';
+			nl++;
+		}
 	}
 
-	switch (size % 3)
+	switch (plain_size % 3)
 	{
 		case 1:
-			out[j - 2] = '=';
+			encoded[j - 2] = '=';
 
 		case 2:
-			out[j - 1] = '=';
+			encoded[j - 1] = '=';
 	}
 }
 
-void base64_decode(char *out, const char *in, size_t size)
+void base64_decode(const char *encoded, size_t encoded_size, char *decoded, size_t *decoded_size)
 {
-	for (int i = 0, j = 0; i < size;)
+	int i, j;
+	for (i = 0, j = 0; i < encoded_size;)
 	{
-		if (in[i] == '\n')
+		if (encoded[i] == '\n')
 		{
 			i++;
 			continue;
 		}
 
-		const unsigned padding_count = (in[i + 2] == '=') + (in[i + 3] == '=');
+		const unsigned padding_count = (encoded[i + 2] == '=') + (encoded[i + 3] == '=');
 
 		uint32_t chars;
-		chars = inverse_charset[in[i + 0]] << 26;
-		chars |= inverse_charset[in[i + 1]] << 20;
-		chars |= inverse_charset[in[i + 2]] << 14;
-		chars |= inverse_charset[in[i + 3]] << 8;
+		chars = inverse_charset[encoded[i + 0]] << 26;
+		chars |= inverse_charset[encoded[i + 1]] << 20;
+		chars |= inverse_charset[encoded[i + 2]] << 14;
+		chars |= inverse_charset[encoded[i + 3]] << 8;
 
 		chars = to_bigendian_32(chars);
 
 		char *chars_ptr = (char *)&chars;
-		out[j++] = chars_ptr[0];
+		decoded[j++] = chars_ptr[0];
 		if (padding_count < 2)
-			out[j++] = chars_ptr[1];
+			decoded[j++] = chars_ptr[1];
 		if (padding_count < 1)
-			out[j++] = chars_ptr[2];
+			decoded[j++] = chars_ptr[2];
 
 		i += 4;
 	}
+
+	if (decoded_size != NULL)
+		*decoded_size = j;
 }
