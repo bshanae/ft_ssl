@@ -47,4 +47,11 @@ class Base64TestSuite
 				  .pass_args('base64 -d -i in.txt -o out.txt')
 				  .expect_file('out.txt', "123\n")
 	end
+
+	def test_7
+		TestConfig.new('base64@7')
+				  .pass_stdin("repeat after me ' encoding is not encryption'")
+				  .pass_args('base64 -e')
+				  .expect_stdout('cmVwZWF0IGFmdGVyIG1lICcgZW5jb2RpbmcgaXMgbm90IGVuY3J5cHRpb24nCg==')
+	end
 end
