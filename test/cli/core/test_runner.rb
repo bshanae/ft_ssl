@@ -7,10 +7,16 @@ class TestRunner
 	RESET = "\u001b[0m"
 
 	def run_test(test)
+		main_dir = Dir.getwd
+
 		workdir = Dir.mktmpdir
 		cmd = generate_cmd(test)
 
 		Dir.chdir(workdir) do
+			unless test.copy_res_name.nil?
+				FileUtils.cp(File.join(main_dir, 'test/cli/res', test.copy_res_name), test.copy_res_name)
+			end
+
 			unless test.preparation_script.nil?
 				system(test.preparation_script)
 			end

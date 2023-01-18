@@ -4,7 +4,7 @@
 #include "tools/memory_tools.h"
 #include "tools/io_tools.h"
 #include "algo/tools/padding.h"
-#include "algo/md5/md5_interface.h"
+#include "algo/sha256/sha256_interface.h"
 #include "des.h"
 
 size_t des_encrypted_size(const size_t plain_size)
@@ -15,19 +15,23 @@ size_t des_encrypted_size(const size_t plain_size)
 		return (plain_size / DES_BLOCK_SIZE + 1) * DES_BLOCK_SIZE;
 }
 
-void des_generate_key(const char *password, uint64_t salt, uint8_t hash[16])
+void des_generate_key_and_iv(const char *password, const uint64_t salt, uint64_t *key, uint64_t *iv)
 {
+	uint64_t hash[SHA256_HASH_SIZE / 8];
+
 	const int password_length = (int)ft_strlen(password);
 	const int password_with_salt_length = password_length + 8;
 
-	char *password_with_salt = malloc(password_with_salt_length + 1);
+	char *password_with_salt = malloc(password_with_salt_length);
 	ft_strcpy(password_with_salt, password);
 	ft_memcpy(password_with_salt + password_length, &salt, 8);
-	password_with_salt[password_with_salt_length] = '\0';
 
-	md5_memory(password_with_salt, 12, hash);
+	sha256_memory(password_with_salt, password_with_salt_length, (uint8_t *)&hash);
 
 	free(password_with_salt);
+
+	*key = to_bigendian_64(hash[0]);
+	*iv = to_bigendian_64(hash[1]);
 }
 
 void des_encrypt_ecb(const void *plaintext, const size_t plaintext_size, void *ciphertext, const uint64_t *key)

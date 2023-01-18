@@ -105,7 +105,7 @@ int resolve_options(struct options *options, int *argi, char **argv)
 				}
 
 				options->has_salt = 1;
-				options->salt = parse_h64(argv[++(*argi)]);
+				options->salt = to_bigendian_64(parse_h64(argv[++(*argi)]));
 				break;
 
 			case 'k':
@@ -175,10 +175,13 @@ static int resolve_input(const struct options *options, char **input, size_t *in
 
 static int resolve_key_and_iv(struct options *options, const int need_iv, char **input, size_t *input_size)
 {
-	if (options->has_key && (options->has_iv || !need_iv))
-		return 0;
+	const int get_key = !options->has_key;
+	const int get_iv = !options->has_iv && need_iv;
 
-	if (options->password == NULL)
+	const int get_password = (get_key || get_iv);
+	const int get_salt = (get_key || get_iv) && !options->has_salt;
+
+	if (get_password && options->password == NULL)
 	{
 		static const char *encryption_message = "enter des encryption password: ";
 		static const char *decryption_message = "enter des decryption password: ";
@@ -191,57 +194,64 @@ static int resolve_key_and_iv(struct options *options, const int need_iv, char *
 		}
 	}
 
-	if (!options->has_salt)
+	if (options->mode == M_ENCRYPT)
 	{
-		if (options->mode == M_ENCRYPT)
+		if (get_salt)
 		{
 			options->has_salt = 1;
 			options->salt = generate_salt();
 		}
-		else
+	}
+	else
+	{
+		if (ft_strncmp(*input, "Salted__", 8) == 0 && *input_size >= 16)
 		{
-			if (ft_strncmp(*input, "Salted__", 8) != 0)
+			if (get_salt)
 			{
-				print_error("Salt is not found.");
-				return 1;
+				options->has_salt = 1;
+				options->salt = *(uint64_t *)(*input + 8);
 			}
-			if (*input_size <= 16)
-			{
-				print_error("Invalid ciphertext.");
-				return 1;
-			}
-
-			options->has_salt = 1;
-			options->salt = to_bigendian_64(*(uint64_t *)(*input + 8));
 
 			const size_t temp_size = *input_size - 16;
 			char *temp = malloc(temp_size);
-			ft_strcpy(temp, *input + 16);
+			ft_memcpy(temp, *input + 16, temp_size);
 
 			free(*input);
 			*input = temp;
 			*input_size = temp_size;
 		}
+		else
+		{
+			if (get_salt)
+			{
+				print_error("Salt is not found.");
+				return 1;
+			}
+		}
 	}
 
-	uint32_t hash[4];
-	des_generate_key(options->password, options->salt, (uint8_t *)hash);
+	if (get_key || get_iv)
+	{
+		uint64_t generated_key;
+		uint64_t generated_iv;
+		des_generate_key_and_iv(options->password, options->salt, &generated_key, &generated_iv);
 
-	if (!options->has_key)
-	{
-		options->has_key = 1;
-		options->key = ((uint64_t) SWAP_32(hash[0]) << 32) | SWAP_32(hash[1]);
-	}
-	if (!options->has_iv)
-	{
-		options->has_iv = 1;
-		options->iv = ((uint64_t) SWAP_32(hash[2]) << 32) | SWAP_32(hash[3]);
+		if (get_key)
+		{
+			options->has_key = 1;
+			options->key = generated_key;
+		}
+		if (get_iv)
+		{
+			options->has_iv = 1;
+			options->iv = generated_iv;
+		}
 	}
 
 	return 0;
 }
 
-static void write_output(const struct options *options, const char *output, const size_t output_size, int last_write)
+static void write_output(const struct options *options, const char *output, const size_t output_size)
 {
 	if (options->output_file != NULL)
 	{
@@ -251,7 +261,7 @@ static void write_output(const struct options *options, const char *output, cons
 	else
 	{
 		write(STDOUT_FILENO, output, output_size);
-		if (last_write && output[output_size - 1] != '\n')
+		if (output[output_size - 1] != '\n')
 			write(STDOUT_FILENO, "\n", 1);
 	}
 }
@@ -273,14 +283,6 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 	if (resolve_input(&options, &input, &input_size) != 0)
 		return 1;
 
-	// resolve key and iv
-
-	if (resolve_key_and_iv(&options, use_iv, &input, &input_size) != 0)
-	{
-		free(input);
-		return 1;
-	}
-
 	// decode with base64
 
 	if (options.mode == M_DECRYPT && options.apply_base64)
@@ -296,13 +298,23 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 		input_size = temp_size;
 	}
 
-	// encode/decode
+	// resolve key and iv
+
+	if (resolve_key_and_iv(&options, use_iv, &input, &input_size) != 0)
+	{
+		free(input);
+		return 1;
+	}
+
+	// encrypt/decrypt
 
 	size_t output_size = (options.mode == M_ENCRYPT ? des_encrypted_size(input_size) : input_size);
 	char *output = malloc(output_size + 1);
 
 	if (options.mode == M_ENCRYPT)
+	{
 		encryptor(input, input_size, output, &options.key, &options.iv);
+	}
 	else
 	{
 		if (decryptor(output, &output_size, input, ROUND_DOWN(input_size, DES_BLOCK_SIZE), &options.key, &options.iv) != 0)
@@ -314,6 +326,23 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 	}
 
 	output[output_size] = '\0';
+
+	// prepend salt
+
+	if (options.mode == M_ENCRYPT && options.has_salt)
+	{
+		const size_t temp_size = output_size + 16;
+		char *temp = malloc(temp_size + 1);
+		temp[temp_size] = '\0';
+
+		ft_strcpy(temp, "Salted__");
+		ft_memcpy(temp + 8, &options.salt, 8);
+		ft_memcpy(temp + 16, output, output_size);
+
+		free(output);
+		output = temp;
+		output_size = temp_size;
+	}
 
 	// encode with base64
 
@@ -332,16 +361,7 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 
 	// write
 
-	if (options.mode == M_ENCRYPT && options.password != NULL)
-	{
-		char header[16];
-		ft_strcpy(header, "Salted__");
-		ft_memcpy(header + 8, &options.salt, 8);
-
-		write_output(&options, header, 16, 0);
-	}
-
-	write_output(&options, output, output_size, 1);
+	write_output(&options, output, output_size);
 
 	// exit
 

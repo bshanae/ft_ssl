@@ -2,6 +2,7 @@ class TestConfig
 	attr_reader :id
 	attr_reader :preparation_script
 	attr_reader :stdin
+	attr_reader :copy_res_name
 	attr_reader :args
 	attr_reader :expected_stdout
 	attr_reader :expected_file_name
@@ -14,6 +15,11 @@ class TestConfig
 
 	def prepare(script)
 		@preparation_script = script
+		self
+	end
+
+	def copy_res(res)
+		@copy_res_name = res
 		self
 	end
 
