@@ -238,7 +238,7 @@ static int resolve_key_and_iv(struct options *options, const int need_iv, char *
 	return 0;
 }
 
-static void write_output(const struct options *options, const char *output, const size_t output_size, int newline)
+static void write_output(const struct options *options, const char *output, const size_t output_size, int last_write)
 {
 	if (options->output_file != NULL)
 	{
@@ -248,7 +248,7 @@ static void write_output(const struct options *options, const char *output, cons
 	else
 	{
 		write(STDOUT_FILENO, output, output_size);
-		if (newline)
+		if (last_write && output[output_size - 1] != '\n')
 			write(STDOUT_FILENO, "\n", 1);
 	}
 }

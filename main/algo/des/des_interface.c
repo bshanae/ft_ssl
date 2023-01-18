@@ -69,7 +69,7 @@ int des_decrypt_ecb(void *plaintext, size_t *plaintext_size, const void *ciphert
 		print_error("Decryption error.");
 		return 1;
 	}
-	*plaintext_size = i - 1 - padding_size;
+	*plaintext_size = i - padding_size;
 
 	return 0;
 }
