@@ -140,12 +140,12 @@ int resolve_options(struct options *options, int *argi, char **argv)
 	return 0;
 }
 
-static int resolve_input(const struct options *options, char **input)
+static int resolve_input(const struct options *options, char **input, size_t *input_size)
 {
 	if (options->input_file != NULL)
 	{
 		*input = NULL;
-		if (read_from_file(options->input_file, input) != 0)
+		if (read_from_file(options->input_file, input, input_size) != 0)
 		{
 			print_error("Failed to read from file!");
 			free(*input);
@@ -157,15 +157,18 @@ static int resolve_input(const struct options *options, char **input)
 	else
 	{
 		char *std_input = NULL;
-		read_from_descriptor(&std_input, STDIN_FILENO);
+		size_t std_input_size;
+		read_from_descriptor(STDIN_FILENO, &std_input, &std_input_size);
 
-		if (ft_strlen(std_input) == 0)
+		if (std_input_size == 0)
 		{
 			free(std_input);
 			return 1;
 		}
 
 		*input = std_input;
+		*input_size = std_input_size;
+
 		return 0;
 	}
 }
@@ -266,10 +269,9 @@ static int process_des_command(char **argv, des_encrypt_functor encryptor, des_d
 	// resolve input
 
 	char *input;
-	if (resolve_input(&options, &input) != 0)
+	size_t input_size;
+	if (resolve_input(&options, &input, &input_size) != 0)
 		return 1;
-
-	size_t input_size = ft_strlen(input);
 
 	// resolve key and iv
 

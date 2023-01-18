@@ -1,6 +1,5 @@
 #include "processing.h"
 
-#include <string.h>
 #include <unistd.h>
 #include "libft_standart.h"
 #include "libft_ft_printf.h"
@@ -91,9 +90,10 @@ void process_stdin(unsigned flags, hash_function function, int hash_size, const 
 	// resolve input
 
 	char *std_input = NULL;
-	read_from_descriptor(&std_input, STDIN_FILENO);
+	size_t std_input_size;
+	read_from_descriptor(STDIN_FILENO, &std_input, &std_input_size);
 
-	if (ft_strlen(std_input) == 0)
+	if (std_input_size == 0)
 	{
 		free(std_input);
 		return;
@@ -182,7 +182,8 @@ void process_file(unsigned flags, hash_function function, int hash_size, const c
 	(*argi)++;
 
 	char *file = NULL;
-	if (read_from_file(filename, &file) != 0)
+	size_t file_size;
+	if (read_from_file(filename, &file, &file_size) != 0)
 	{
 		print_error("Can't read file.");
 		return;
